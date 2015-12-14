@@ -22,8 +22,10 @@ add_definitions(
 )
 
 add_library(graphix SHARED
+    public/gfx/window.h
     public/graphix.h
-    src/graphix.cpp
+    src/window.cpp
+    src/window_impl.h
 )
 
 target_include_directories(graphix
