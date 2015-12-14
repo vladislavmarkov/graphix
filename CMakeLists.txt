@@ -8,4 +8,4 @@ add_subdirectory(graphix)
 add_subdirectory(unit_testing)
 
 add_dependencies(documentation graphix)
-add_dependencies(unit_testing_app graphix)
+add_dependencies(unit_testing_app graphix documentation)
