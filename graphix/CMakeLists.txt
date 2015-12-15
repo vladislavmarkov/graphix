@@ -30,8 +30,10 @@ add_definitions(
 )
 
 add_library(graphixlib SHARED
+    public/gfx/application.h
     public/gfx/graphix.h
     public/gfx/window.h
+    src/application.cpp
     src/window.cpp
     src/window_impl.h
 )

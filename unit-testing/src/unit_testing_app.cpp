@@ -1,6 +1,7 @@
 #include <gfx/window.h>
 #include <gtest/gtest.h>
 
+#include "application.h"
 #include "window.h"
 
 int main(int argc, char **argv){

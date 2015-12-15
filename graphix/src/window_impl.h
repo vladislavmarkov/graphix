@@ -5,7 +5,7 @@
 namespace gfx{
 
 class window_impl: public window{
-    GLFWwindow *glfw_w_;
+    GLFWwindow *handle_;
 
     std::string caption_;
 
@@ -14,12 +14,14 @@ class window_impl: public window{
         height_;
 
 public:
+    friend int run(gfx::window *main_window);
+
     window_impl(
         const std::string &caption,
         size_t width,
         size_t height
     ):
-        glfw_w_(
+        handle_(
             glfwCreateWindow(
                 static_cast<int>(width), static_cast<int>(height),
                 caption.c_str(), nullptr, nullptr
@@ -29,13 +31,13 @@ public:
         width_(width),
         height_(height)
     {
-        if (!glfw_w_){
+        if (!handle_){
             throw std::runtime_error("failed to create window");
         }
     }
 
     ~window_impl() override{
-        glfwDestroyWindow(glfw_w_);
+        glfwDestroyWindow(handle_);
     }
 
     void set_caption(const std::string &caption) override{
@@ -60,6 +62,10 @@ public:
 
     size_t get_height() const override{
         return height_;
+    }
+
+    void close() override{
+        glfwSetWindowShouldClose(handle_, GL_TRUE);
     }
 };
 

@@ -32,32 +32,38 @@ public:
 
     virtual void set_caption(const std::string&) = 0;
     /*!<
-    Sets window's caption.
+    Sets [window](@ref window)'s caption.
      */
 
     virtual void set_width(size_t) = 0;
     /*!<
-    Sets window's width.
+    Sets [window](@ref window)'s width.
      */
 
     virtual void set_height(size_t) = 0;
     /*!<
-    Sets window's height.
+    Sets [window](@ref window)'s height.
      */
 
     virtual std::string get_caption() const = 0;
     /*!<
-    Retrieves window's caption.
+    Retrieves [window](@ref window)'s caption.
      */
 
     virtual size_t get_width() const = 0;
     /*!<
-    Retrieves window's width.
+    Retrieves [window](@ref window)'s width.
      */
 
     virtual size_t get_height() const = 0;
     /*!<
-    Retrieves window's height.
+    Retrieves [window](@ref window)'s height.
+     */
+
+    virtual void close() = 0;
+    /*!<
+    Closes the [window](@ref window) and terminates an application if closed
+    [window](@ref window) was the main [window](@ref window).
      */
 
     static std::unique_ptr<window> create(

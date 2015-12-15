@@ -34,7 +34,6 @@ TEST(window, empty_caption_test){
     }catch(...){
         FAIL() << "expected std::invalid_argument";
     }
-
 }
 
 TEST(window, caption_only_test){
