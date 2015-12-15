@@ -20,14 +20,12 @@ add_executable(unit_testing_app
 )
 
 target_include_directories(unit_testing_app
-    PUBLIC graphix ${GTEST_INCLUDE_DIRS}
+    PUBLIC graphixlib ${GTEST_INCLUDE_DIRS}
     PRIVATE src
 )
 
-link_directories(graphix)
-
 target_link_libraries(unit_testing_app
-    graphix
+    graphixlib
     ${GTEST_BOTH_LIBRARIES}
     pthread
 )
