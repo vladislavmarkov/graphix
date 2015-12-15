@@ -1,9 +1,11 @@
 #include <gfx/window.h>
 #include <GLFW/glfw3.h>
 #include <memory>
+#include <stdexcept>
 
 #include "window_impl.h"
 
+using std::invalid_argument;
 using std::unique_ptr;
 
 namespace gfx{
@@ -13,6 +15,10 @@ unique_ptr<window> window::create(
     size_t width,
     size_t height
 ){
+    if (caption.empty()){
+        throw invalid_argument("empty caption");
+    }
+
     static struct guardian__{
         guardian__(){
             if (!glfwInit()){

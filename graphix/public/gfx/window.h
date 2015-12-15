@@ -25,6 +25,11 @@ public:
     Deleted.
      */
 
+    virtual ~window() = default;
+    /*!<
+    Default destructor.
+     */
+
     virtual void set_caption(const std::string&) = 0;
     /*!<
     Sets window's caption.
@@ -64,6 +69,7 @@ public:
     Creates a [window](@ref window) with specified parameters and returns a
     [std::unique_ptr](http://ru.cppreference.com/w/cpp/memory/unique_ptr) to a
     created [window](@ref window) object.
+    \param caption caption of the [window](@ref window). Can not be empty.
     \param width can be ignored to use a default value.
     \param height can be ignored to use a default value.
      */

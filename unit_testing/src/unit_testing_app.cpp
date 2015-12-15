@@ -1,7 +1,7 @@
 #include <gfx/window.h>
 #include <gtest/gtest.h>
 
-#include "window_caption_width_height.h"
+#include "window.h"
 
 int main(int argc, char **argv){
     ::testing::InitGoogleTest(&argc, argv);

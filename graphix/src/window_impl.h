@@ -34,6 +34,10 @@ public:
         }
     }
 
+    ~window_impl() override{
+        glfwDestroyWindow(glfw_w_);
+    }
+
     void set_caption(const std::string &caption) override{
         caption_ = caption;
     }

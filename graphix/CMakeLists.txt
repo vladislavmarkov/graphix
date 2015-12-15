@@ -47,3 +47,9 @@ target_link_libraries(graphix
     ${GLEW_LIBRARIES}
     ${GLFW3_LIBRARIES}
 )
+
+install(TARGETS graphix
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+)
