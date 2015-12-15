@@ -7,8 +7,11 @@ set(PROJECT_DESCRIPTION "Graphix is a OpenGL C++ wrapper library.")
 include(FindPkgConfig)
 find_package(PkgConfig REQUIRED)
 
-pkg_check_modules(GLEW REQUIRED glew)
-pkg_check_modules(GLFW3 REQUIRED glfw3)
+set(GLEW_REQUIRED_VERSION "glew >= 1.13.0")
+set(GLFW3_REQUIRED_VERSION "glfw3 >= 3.1.2")
+
+pkg_check_modules(GLEW REQUIRED ${GLEW_REQUIRED_VERSION})
+pkg_check_modules(GLFW3 REQUIRED ${GLFW3_REQUIRED_VERSION})
 
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
@@ -81,7 +84,7 @@ set(CPACK_PACKAGE_FILE_NAME
 
 set(CPACK_STRIP_FILES FALSE)
 
-set(PKG_CONFIG_REQUIRES "glfw3 glew")
+set(PKG_CONFIG_REQUIRES "${GLEW_REQUIRED_VERSION} ${GLFW3_REQUIRED_VERSION}")
 
 set(PKG_CONFIG_LIBDIR
     "\${prefix}/lib"
