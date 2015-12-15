@@ -1,4 +1,9 @@
-project(graphixlib)
+project(graphixlib
+    VERSION 0.0.1
+)
+
+set(PROJECT_DESCRIPTION "Graphix is a OpenGL C++ wrapper library.")
+
 include(FindPkgConfig)
 find_package(PkgConfig REQUIRED)
 
@@ -28,8 +33,10 @@ add_library(graphixlib SHARED
     src/window_impl.h
 )
 
+set(GRAPHIXLIB_PACKAGE_NAME graphix)
+
 set_target_properties(graphixlib
-    PROPERTIES OUTPUT_NAME graphix
+    PROPERTIES OUTPUT_NAME ${GRAPHIXLIB_PACKAGE_NAME}
 )
 
 target_include_directories(graphixlib
@@ -59,8 +66,8 @@ file(GLOB gfx_include_files
 install(FILES ${gfx_include_files} DESTINATION include/gfx)
 
 install(TARGETS graphixlib
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/lib"
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_PREFIX}/lib"
 )
 
 set(CPACK_PACKAGE_NAME "libgraphix-dev")
@@ -68,15 +75,40 @@ set(CPACK_PACKAGE_NAME "libgraphix-dev")
 set(CPACK_GENERATOR "DEB")
 set(CPACK_PACKAGE_CONTACT "Vlad Markov <vladislav.u.markov@gmail.com>")
 
-set(CPACK_PACKAGE_VERSION_MAJOR 0)
-set(CPACK_PACKAGE_VERSION_MINOR 0)
-set(CPACK_PACKAGE_VERSION_PATCH 1)
-
 set(CPACK_PACKAGE_FILE_NAME
-"libgraphix-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-dev"
+"lib${GRAPHIXLIB_PACKAGE_NAME}-${PROJECT_VERSION}-dev"
 )
 
 set(CPACK_STRIP_FILES FALSE)
+
+set(PKG_CONFIG_REQUIRES "glfw3 glew")
+
+set(PKG_CONFIG_LIBDIR
+    "\${prefix}/lib"
+)
+
+set(PKG_CONFIG_INCLUDEDIR
+    "\${prefix}/include/gfx"
+)
+
+set(PKG_CONFIG_LIBS
+    "-L\${libdir} -l${GRAPHIXLIB_PACKAGE_NAME}"
+)
+
+set(PKG_CONFIG_CFLAGS
+    "-I\${includedir}"
+)
+
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/${GRAPHIXLIB_PACKAGE_NAME}.pc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/${GRAPHIXLIB_PACKAGE_NAME}.pc
+    @ONLY
+)
+
+install(
+    FILES "${CMAKE_CURRENT_BINARY_DIR}/${GRAPHIXLIB_PACKAGE_NAME}.pc"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig"
+)
 
 add_custom_target(deb_package)
 
