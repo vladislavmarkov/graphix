@@ -9,15 +9,12 @@ using std::invalid_argument;
 
 namespace gfx{
 
-int run(window *main_window){
-    if (!main_window){
-        throw invalid_argument("main window is null");
-    }
+int run(window &main_window){
+    window_impl &main_window_impl =
+        dynamic_cast<window_impl&>(main_window);
 
-    window_impl *main_window_impl = dynamic_cast<window_impl*>(main_window);
-
-    while (!glfwWindowShouldClose(main_window_impl->handle_)){
-        glfwSwapBuffers(main_window_impl->handle_);
+    while (!glfwWindowShouldClose(main_window_impl.handle_)){
+        glfwSwapBuffers(main_window_impl.handle_);
         glfwPollEvents();
     }
 

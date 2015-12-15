@@ -14,7 +14,7 @@ class window_impl: public window{
         height_;
 
 public:
-    friend int run(gfx::window *main_window);
+    friend int run(window&);
 
     window_impl(
         const std::string &caption,

@@ -6,7 +6,7 @@ namespace gfx{
 
 class window;
 
-int run(gfx::window *main_window);
+int run(gfx::window &main_window);
 /*!<
 Starts the application. Lifetime is bounded by a lifetime of
 <EM>main_window</EM>.
