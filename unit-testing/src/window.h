@@ -36,3 +36,12 @@ TEST(window, empty_caption_test){
     }
 
 }
+
+TEST(window, caption_only_test){
+    try{
+        std::unique_ptr<gfx::window> window_ =
+            gfx::window::create("caption only");
+    }catch(...){
+        FAIL() << "expected no exceptions";
+    }
+}

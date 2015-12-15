@@ -10,6 +10,15 @@ using std::unique_ptr;
 
 namespace gfx{
 
+namespace {
+
+enum: size_t {
+    default_width = 640,
+    default_height = 480
+};
+
+}
+
 unique_ptr<window> window::create(
     const std::string &caption,
     size_t width,
@@ -32,7 +41,13 @@ unique_ptr<window> window::create(
         }
     } glfw_guardian__;
 
-    return unique_ptr<window>(new window_impl(caption, width, height));
+    return unique_ptr<window>(
+        new window_impl(
+            caption,
+            !width ? default_width : width,
+            !height ? default_height : height
+        )
+    );
 }
 
 }
