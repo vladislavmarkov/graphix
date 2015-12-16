@@ -7,7 +7,7 @@ set(PROJECT_DESCRIPTION "Graphix is a OpenGL C++ wrapper library.")
 include(FindPkgConfig)
 find_package(PkgConfig REQUIRED)
 
-set(GLEW_REQUIRED_VERSION "glew >= 1.13.0")
+set(GLEW_REQUIRED_VERSION "glew >= 1.10.0")
 set(GLFW3_REQUIRED_VERSION "glfw3 >= 3.1.2")
 
 pkg_check_modules(GLEW REQUIRED ${GLEW_REQUIRED_VERSION})
@@ -15,7 +15,7 @@ pkg_check_modules(GLFW3 REQUIRED ${GLFW3_REQUIRED_VERSION})
 
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost 1.58)
+find_package(Boost 1.54)
 
 add_definitions(
     "-std=gnu++11"
@@ -62,6 +62,7 @@ link_directories(
 target_link_libraries(graphixlib
     ${GLEW_LIBRARIES}
     ${GLFW3_LIBRARIES}
+    ${GLFW3_STATIC_LIBRARIES}
 )
 
 file(GLOB gfx_include_files
