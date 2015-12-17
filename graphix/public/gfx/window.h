@@ -71,7 +71,7 @@ public:
      */
 
     virtual void set_key_reaction(
-        const std::function<void(key::code, key::state)> &key_func
+        const std::function<void(window&, key::code, key::state)> &key_func
     ) = 0;
     /*!<
     Sets a key reaction callback function.

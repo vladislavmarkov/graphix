@@ -14,6 +14,13 @@ class window_impl: public window{
         width_,
         height_;
 
+    struct user_context{
+        window *wnd_;
+        std::function<
+            void(window &wnd, key::code, key::state)
+        > *key_func_;
+    } user_context_;
+
 public:
     friend int run(window&);
 
@@ -76,18 +83,13 @@ public:
         int action,
         int /*mods*/
     ){
-        const std::function<void(key::code, key::state)> * const
-            user_callback_ =
-                reinterpret_cast<
-                    const std::function<void(key::code, key::state)>* const
-                >(
-                    const_cast<const void*>(
-                        glfwGetWindowUserPointer(handle)
-                    )
-                );
+        user_context *uc = reinterpret_cast<user_context*>(
+            glfwGetWindowUserPointer(handle)
+        );
 
-        if (user_callback_){
-            (*user_callback_)(
+        if (uc && uc->wnd_ && uc->key_func_){
+            (*uc->key_func_)(
+                *uc->wnd_,
                 static_cast<key::code>(key),
                 static_cast<key::state>(action)
             );
@@ -95,13 +97,20 @@ public:
     }
 
     void set_key_reaction(
-        const std::function<void(key::code, key::state)> &key_func
+        const std::function<void(window &wnd, key::code, key::state)> &key_func
     ) override{
+        user_context_ = {
+            this,
+            const_cast<
+                std::function<
+                    void(window&, key::code, key::state)
+                >*
+            >(&key_func)
+        };
+
         glfwSetWindowUserPointer(
             handle_,
-            const_cast<void*>(
-                reinterpret_cast<const void*>(&key_func)
-            )
+            &user_context_
         );
 
         glfwSetKeyCallback(handle_, glfw_key_callback);
