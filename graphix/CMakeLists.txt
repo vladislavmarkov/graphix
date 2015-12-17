@@ -32,6 +32,7 @@ add_definitions(
 add_library(graphixlib SHARED
     public/gfx/application.h
     public/gfx/graphix.h
+    public/gfx/key.h
     public/gfx/window.h
     src/application.cpp
     src/window.cpp
@@ -82,28 +83,20 @@ set(CPACK_GENERATOR "DEB")
 set(CPACK_PACKAGE_CONTACT "Vlad Markov <vladislav.u.markov@gmail.com>")
 
 set(CPACK_PACKAGE_FILE_NAME
-"lib${GRAPHIXLIB_PACKAGE_NAME}-${PROJECT_VERSION}-dev"
+    "lib${GRAPHIXLIB_PACKAGE_NAME}-${PROJECT_VERSION}-dev"
 )
 
 set(CPACK_STRIP_FILES FALSE)
 
 set(PKG_CONFIG_REQUIRES "${GLEW_REQUIRED_VERSION} ${GLFW3_REQUIRED_VERSION}")
 
-set(PKG_CONFIG_LIBDIR
-    "\${prefix}/lib"
-)
+set(PKG_CONFIG_LIBDIR "\${prefix}/lib")
 
-set(PKG_CONFIG_INCLUDEDIR
-    "\${prefix}/include/gfx"
-)
+set(PKG_CONFIG_INCLUDEDIR "\${prefix}/include")
 
-set(PKG_CONFIG_LIBS
-    "-L\${libdir} -l${GRAPHIXLIB_PACKAGE_NAME}"
-)
+set(PKG_CONFIG_LIBS "-L\${libdir} -l${GRAPHIXLIB_PACKAGE_NAME}")
 
-set(PKG_CONFIG_CFLAGS
-    "-I\${includedir}"
-)
+set(PKG_CONFIG_CFLAGS "-I\${includedir}")
 
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/${GRAPHIXLIB_PACKAGE_NAME}.pc.in

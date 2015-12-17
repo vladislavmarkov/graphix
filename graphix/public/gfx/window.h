@@ -1,15 +1,19 @@
+/*! \file gfx/window.h */
+
 #pragma once
 #ifndef __GFX_WINDOW_H__
 #define __GFX_WINDOW_H__
 
+#include <functional>
+#include <gfx/key.h>
 #include <memory>
 #include <string>
 
 namespace gfx{
 
-/*!
-\relates window
-Represents a [window](@ref window) <B><EM>interface</EM></B>.
+/*! \class window
+    \relates window
+    \brief Represents a [window](@ref window) <B><EM>interface</EM></B>.
  */
 class window{
 protected:
@@ -64,6 +68,14 @@ public:
     /*!<
     Closes the [window](@ref window) and terminates an application if closed
     [window](@ref window) was the main [window](@ref window).
+     */
+
+    virtual void set_key_reaction(
+        const std::function<void(key::code, key::state)> &key_func
+    ) = 0;
+    /*!<
+    Sets a key reaction callback function.
+    \param key_func self-explanatory.
      */
 
     static std::unique_ptr<window> create(

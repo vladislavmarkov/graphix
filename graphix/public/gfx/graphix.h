@@ -1,3 +1,5 @@
+/*! \file gfx/graphix.h */
+
 #pragma once
 #ifndef __GRAPHIX_H__
 #define __GRAPHIX_H__

@@ -1,3 +1,4 @@
+#include <gfx/key.h>
 #include <gfx/window.h>
 #include <GLFW/glfw3.h>
 #include <stdexcept>
@@ -66,6 +67,44 @@ public:
 
     void close() override{
         glfwSetWindowShouldClose(handle_, GL_TRUE);
+    }
+
+    static void glfw_key_callback(
+        GLFWwindow* handle,
+        int key,
+        int /*scancode*/,
+        int action,
+        int /*mods*/
+    ){
+        const std::function<void(key::code, key::state)> * const
+            user_callback_ =
+                reinterpret_cast<
+                    const std::function<void(key::code, key::state)>* const
+                >(
+                    const_cast<const void*>(
+                        glfwGetWindowUserPointer(handle)
+                    )
+                );
+
+        if (user_callback_){
+            (*user_callback_)(
+                static_cast<key::code>(key),
+                static_cast<key::state>(action)
+            );
+        }
+    }
+
+    void set_key_reaction(
+        const std::function<void(key::code, key::state)> &key_func
+    ) override{
+        glfwSetWindowUserPointer(
+            handle_,
+            const_cast<void*>(
+                reinterpret_cast<const void*>(&key_func)
+            )
+        );
+
+        glfwSetKeyCallback(handle_, glfw_key_callback);
     }
 };
 
