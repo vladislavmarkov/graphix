@@ -10,13 +10,19 @@
 
 namespace gfx{
 
-class scene: public drawable{
+class scene{
 public:
     virtual void add(volumetric *obj) = 0;
     virtual void set_camera(camera *cam) = 0;
 
     static std::unique_ptr<scene> create(
-        float hfov, int width, int height, float near, float far, camera *cam
+        float hfov,
+        int width,
+        int height,
+        float near,
+        float far,
+        camera *cam,
+        glm::vec4 clear_color
     );
 };
 

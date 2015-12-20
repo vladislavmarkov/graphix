@@ -1,8 +1,15 @@
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
+#include <algorithm>
 #include <atomic>
 #include <gfx/key.h>
+#include <gfx/scene.h>
 #include <gfx/window.h>
-#include <GLFW/glfw3.h>
+#include <list>
 #include <stdexcept>
+
+#include "scene_impl.h"
 
 namespace gfx{
 
@@ -11,12 +18,7 @@ class window_impl: public window{
 
     std::string caption_;
 
-    size_t
-        width_,
-        height_;
-
-    // modification flag (if true, then window should be redrawn)
-    std::atomic<bool> content_modified_{true};
+    int width_, height_;
 
     // user context, used by user callback functions
     struct user_context{
@@ -31,11 +33,13 @@ class window_impl: public window{
         > *resize_func_;
     } user_context_;
 
+    std::list<scene_impl*> scenes_;
+
 public:
     window_impl(
         const std::string &caption,
-        size_t width,
-        size_t height
+        int width,
+        int height
     ):
         handle_(
             glfwCreateWindow(
@@ -70,11 +74,11 @@ public:
         caption_ = caption;
     }
 
-    void set_width(size_t width) override{
+    void set_width(int width) override{
         width_ = width;
     }
 
-    void set_height(size_t height) override{
+    void set_height(int height) override{
         height_ = height;
     }
 
@@ -82,11 +86,11 @@ public:
         return caption_;
     }
 
-    size_t get_width() const override{
+    int get_width() const override{
         return width_;
     }
 
-    size_t get_height() const override{
+    int get_height() const override{
         return height_;
     }
 
@@ -145,9 +149,6 @@ public:
             if (uc->resize_func_){
                 (*uc->resize_func_)(*uc->wnd_, width, height);
             }
-
-            (dynamic_cast<window_impl*>(uc->wnd_))->content_modified_
-                .store(true, std::memory_order_relaxed);
         }
     }
 
@@ -162,14 +163,18 @@ public:
         >(&resize_func);
     }
 
-    void draw(){
-        // TODO: drawing routine
-
-        content_modified_.store(false, std::memory_order_relaxed);
+    void add(scene *scene_obj) override{
+        scenes_.push_back(dynamic_cast<scene_impl*>(scene_obj));
     }
 
-    bool content_modified(){
-        return content_modified_.load(std::memory_order_relaxed);
+    void draw(){
+        std::for_each(std::begin(scenes_), std::end(scenes_),
+            [](scene_impl *scene_obj){
+                if (scene_obj){
+                    scene_obj->draw();
+                }
+            }
+        );
     }
 };
 

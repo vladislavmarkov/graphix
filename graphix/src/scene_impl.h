@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <gfx/glall.h>
 #include <gfx/scene.h>
 #include <gfx/volumetric.h>
 #include <glm/glm.hpp>
@@ -165,9 +166,17 @@ class scene_impl: public scene{
         }
     } dep_mvp_;
 
+    glm::vec4 clear_color_;
+
 public:
     scene_impl(
-        float hfov, int width, int height, float near, float far, camera *cam
+        float hfov,
+        int width,
+        int height,
+        float near,
+        float far,
+        camera *cam,
+        glm::vec4 clear_color
     ):
         hfov_(hfov), nodep_hfov_(&hfov_),
         size_{width, height}, nodep_size_(&size_),
@@ -181,7 +190,8 @@ public:
         ),
         active_camera_(cam), nodep_camera_(active_camera_),
         view_(1.0f), dep_view_(&view_, cam),
-        mvp_(1.0f), dep_mvp_(&mvp_, &projection_, &view_)
+        mvp_(1.0f), dep_mvp_(&mvp_, &projection_, &view_),
+        clear_color_(clear_color)
     {}
 
     void add(volumetric *vol) override{
@@ -189,15 +199,18 @@ public:
         modified_.store(true, std::memory_order_relaxed);
     }
 
-    void set_camera(camera *cam){
-        active_camera_ = cam;
-        modified_.store(true, std::memory_order_relaxed);
-    }
-
-    void draw() override{
+    void draw(){
         if (!active_camera_){
             throw std::logic_error("no active camera is set");
         }
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearColor(
+            clear_color_.x,
+            clear_color_.y,
+            clear_color_.z,
+            clear_color_.w
+        );
 
         std::for_each(std::begin(volumetrics_), std::end(volumetrics_),
             [](volumetric *vol){
@@ -206,6 +219,11 @@ public:
         );
 
         modified_.store(false, std::memory_order_relaxed);
+    }
+
+    void set_camera(camera *cam) override{
+        active_camera_ = cam;
+        modified_.store(true, std::memory_order_relaxed);
     }
 };
 

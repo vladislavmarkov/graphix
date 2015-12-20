@@ -41,9 +41,7 @@ int run(window &main_window){
     }
 
     while (!glfwWindowShouldClose(handle)){
-        if (main_window_impl.content_modified()){
-            main_window_impl.draw();
-        }
+        main_window_impl.draw();
 
         glfwSwapBuffers(handle);
         glfwWaitEvents();

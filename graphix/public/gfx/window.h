@@ -9,6 +9,8 @@
 
 namespace gfx{
 
+class scene;
+
 /*! \class window
     \relates window
     \brief Represents a [window](@ref window) <B><EM>interface</EM></B>.
@@ -37,12 +39,12 @@ public:
     Sets [window](@ref window)'s caption.
      */
 
-    virtual void set_width(size_t) = 0;
+    virtual void set_width(int) = 0;
     /*!<
     Sets [window](@ref window)'s width.
      */
 
-    virtual void set_height(size_t) = 0;
+    virtual void set_height(int) = 0;
     /*!<
     Sets [window](@ref window)'s height.
      */
@@ -52,12 +54,12 @@ public:
     Retrieves [window](@ref window)'s caption.
      */
 
-    virtual size_t get_width() const = 0;
+    virtual int get_width() const = 0;
     /*!<
     Retrieves [window](@ref window)'s width.
      */
 
-    virtual size_t get_height() const = 0;
+    virtual int get_height() const = 0;
     /*!<
     Retrieves [window](@ref window)'s height.
      */
@@ -84,10 +86,16 @@ public:
     \param resize_func self-explanatory.
      */
 
+    virtual void add(scene *scene_obj) = 0;
+    /*!<
+    Adds a scene to a window.
+    \param scene_obj scene to be added.
+     */
+
     static std::unique_ptr<window> create(
         const std::string &caption,
-        size_t width = 0,
-        size_t height = 0
+        int width = 0,
+        int height = 0
     );
     /*!<
     Creates a [window](@ref window) with specified parameters and returns a

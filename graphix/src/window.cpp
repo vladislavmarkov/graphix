@@ -1,5 +1,5 @@
+#include <gfx/glall.h>
 #include <gfx/window.h>
-#include <GLFW/glfw3.h>
 #include <memory>
 #include <stdexcept>
 
@@ -13,7 +13,7 @@ namespace gfx{
 
 namespace {
 
-enum: size_t {
+enum: int {
     default_width = 640,
     default_height = 480
 };
@@ -22,8 +22,8 @@ enum: size_t {
 
 unique_ptr<window> window::create(
     const std::string &caption,
-    size_t width,
-    size_t height
+    int width,
+    int height
 ){
     if (caption.empty()){
         throw invalid_argument("empty caption");
