@@ -22,11 +22,29 @@ class scene_impl: public scene{
 
     float hfov_;
 
-    class nodep_hfov: public dependent{
+    struct size{
+        int width_;
+        int height_;
+    } size_;
+
+    struct depth{
+        float near_;
+        float far_;
+    } depth_;
+
+    class nodep_geometrics: public dependent{
         float *hfov_;
+        size *size_;
+        depth *depth_;
 
     public:
-        nodep_hfov(float *ptr): hfov_(ptr){}
+        nodep_geometrics(float *hfov, size *sz, depth *nf):
+            hfov_(hfov), size_(sz), depth_(nf)
+        {
+            if (size_){
+                glViewport(0, 0, size_->width_, size_->height_);
+            }
+        }
 
         void adjust() override{ /* do nothing */ }
 
@@ -34,51 +52,27 @@ class scene_impl: public scene{
             if (hfov_) *hfov_ = value;
             update();
         }
-    } nodep_hfov_;
 
-    struct size{
-        int width_;
-        int height_;
-    } size_;
-
-    class nodep_size: public dependent{
-        size *size_;
-
-    public:
-        nodep_size(size *ptr): size_(ptr){}
-
-        void adjust() override{ /* do nothing */ }
-
-        void set(int width, int height){
+        void set(size value){
             if (size_){
-                size_->width_ = width;
-                size_->height_ = height;
-                update();
+                *size_ = value;
+                glViewport(0, 0, size_->width_, size_->height_);
             }
+            update();
         }
-    } nodep_size_;
 
-    struct depth{
-        float near_;
-        float far_;
-    } depth_;
-
-    class nodep_depth: public dependent{
-        depth *depth_;
-
-    public:
-        nodep_depth(depth *ptr): depth_(ptr){}
-
-        void adjust() override{ /* do nothing */ }
-
-        void set(float near, float far){
-            if (depth_){
-                depth_->near_ = near;
-                depth_->far_ = far;
-                update();
-            }
+        void set(depth value){
+            if (depth_) *depth_ = value;
+            update();
         }
-    } nodep_depth_;
+
+        void set(float hfov, size sz, depth nf){
+            if (hfov_) *hfov_ = hfov;
+            if (size_) *size_ = sz;
+            if (depth_) *depth_ = nf;
+            update();
+        }
+    } nodep_geometrics_;
 
     glm::mat4 projection_;
 
@@ -178,25 +172,32 @@ public:
         camera *cam,
         glm::vec4 clear_color
     ):
-        hfov_(hfov), nodep_hfov_(&hfov_),
-        size_{width, height}, nodep_size_(&size_),
-        depth_{near, far}, nodep_depth_(&depth_),
+        hfov_(hfov), size_{width, height}, depth_{near, far},
+        nodep_geometrics_(&hfov_, &size_, &depth_),
         projection_(1.0f),
-        dep_projection_(
-            &projection_,
-            &hfov_,
-            &size_,
-            &depth_
-        ),
+        dep_projection_(&projection_, &hfov_, &size_, &depth_),
         active_camera_(cam), nodep_camera_(active_camera_),
         view_(1.0f), dep_view_(&view_, cam),
         mvp_(1.0f), dep_mvp_(&mvp_, &projection_, &view_),
         clear_color_(clear_color)
-    {}
+    {
+        nodep_geometrics_.add_dependency(&dep_projection_);
+        nodep_camera_.add_dependency(&dep_view_);
+        dep_projection_.add_dependency(&dep_mvp_);
+        dep_view_.add_dependency(&dep_mvp_);
+
+        // update everything in a dependency tree
+        nodep_geometrics_.set(hfov_, size_, depth_);
+        nodep_camera_.set(active_camera_);
+    }
 
     void add(volumetric *vol) override{
         volumetrics_.push_back(vol);
         modified_.store(true, std::memory_order_relaxed);
+    }
+
+    void resize(int width, int height){
+        nodep_geometrics_.set(size{width, height});
     }
 
     void draw(){
@@ -206,10 +207,7 @@ public:
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(
-            clear_color_.x,
-            clear_color_.y,
-            clear_color_.z,
-            clear_color_.w
+            clear_color_.x, clear_color_.y, clear_color_.z, clear_color_.w
         );
 
         std::for_each(std::begin(volumetrics_), std::end(volumetrics_),

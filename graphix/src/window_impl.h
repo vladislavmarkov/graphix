@@ -167,6 +167,16 @@ public:
         scenes_.push_back(dynamic_cast<scene_impl*>(scene_obj));
     }
 
+    void resize(int width, int height){
+        std::for_each(std::begin(scenes_), std::end(scenes_),
+            [&width, &height](scene_impl *scene_obj){
+                if (scene_obj){
+                    scene_obj->resize(width, height);
+                }
+            }
+        );
+    }
+
     void draw(){
         std::for_each(std::begin(scenes_), std::end(scenes_),
             [](scene_impl *scene_obj){
