@@ -3,30 +3,47 @@
 
 #include <gfx/application.h>
 #include <gfx/window.h>
-#include <stdexcept>
+#include <sstream>
 
+#include "exception.h"
 #include "window_impl.h"
 
 using std::invalid_argument;
 using std::runtime_error;
+using std::stringstream;
 
 namespace gfx{
+
+namespace { // anonymous
+
+void glfw3_error_callback(int errcode, const char *description){
+    stringstream errmsg;
+    errmsg
+        << "err. code: " << errcode << ", err. message: " << description;
+    throw glfw3_error(errmsg.str().c_str());
+}
+
+} // anonymous
 
 int run(window &main_window){
     window_impl &main_window_impl =
         dynamic_cast<window_impl&>(main_window);
 
-    GLFWwindow *handle = main_window_impl.handle_;
+    GLFWwindow *handle = main_window_impl.get_handle();
 
     glfwMakeContextCurrent(handle);
 
+    glfwSetErrorCallback(glfw3_error_callback);
+
     glewExperimental = GL_TRUE;
     if (GLEW_OK != glewInit()){
-        throw runtime_error("failed to initialize glew");
+        throw glew_error("failed to initialize glew");
     }
 
     while (!glfwWindowShouldClose(handle)){
-        // TODO
+        if (main_window_impl.content_modified()){
+            main_window_impl.draw();
+        }
 
         glfwSwapBuffers(handle);
         glfwWaitEvents();

@@ -1,8 +1,8 @@
 /*! \file gfx/application.h */
 
 #pragma once
-#ifndef __APPLICATION_H__
-#define __APPLICATION_H__
+#ifndef __GFX_APPLICATION_H__
+#define __GFX_APPLICATION_H__
 
 namespace gfx{
 
@@ -18,4 +18,4 @@ int run(gfx::window &main_window);
 
 }
 
-#endif // __APPLICATION_H__
+#endif // __GFX_APPLICATION_H__

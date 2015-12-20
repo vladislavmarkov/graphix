@@ -1,5 +1,3 @@
-/*! \file gfx/window.h */
-
 #pragma once
 #ifndef __GFX_WINDOW_H__
 #define __GFX_WINDOW_H__
@@ -76,6 +74,14 @@ public:
     /*!<
     Sets a key reaction callback function.
     \param key_func self-explanatory.
+     */
+
+    virtual void set_resize_reaction(
+        const std::function<void(window&, int, int)> &resize_func
+    ) = 0;
+    /*!<
+    Sets a resize reaction callback function.
+    \param resize_func self-explanatory.
      */
 
     static std::unique_ptr<window> create(

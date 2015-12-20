@@ -31,10 +31,22 @@ add_definitions(
 
 add_library(graphixlib SHARED
     public/gfx/application.h
+    public/gfx/camera.h
+    public/gfx/drawable.h
     public/gfx/graphix.h
     public/gfx/key.h
+    public/gfx/scene.h
+    public/gfx/shader.h
+    public/gfx/volumetric.h
     public/gfx/window.h
     src/application.cpp
+    src/camera.cpp
+    src/camera_impl.h
+    src/dependent.h
+    src/exception.h
+    src/scene.cpp
+    src/scene_impl.h
+    src/shader.cpp
     src/window.cpp
     src/window_impl.h
 )

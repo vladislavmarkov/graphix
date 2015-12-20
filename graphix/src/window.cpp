@@ -4,6 +4,7 @@
 #include <stdexcept>
 
 #include "window_impl.h"
+#include "exception.h"
 
 using std::invalid_argument;
 using std::unique_ptr;
@@ -32,7 +33,7 @@ unique_ptr<window> window::create(
         guardian__(){
             if (!glfwInit()){
                 glfwTerminate();
-                throw std::runtime_error("failed to initialize glfw");
+                throw glfw3_error("failed to initialize glfw");
             }
 
             glfwWindowHint(GLFW_DOUBLEBUFFER, GL_TRUE);
