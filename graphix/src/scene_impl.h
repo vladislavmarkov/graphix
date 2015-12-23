@@ -10,13 +10,19 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <list>
+#include <memory>
 #include <stdexcept>
 
 #include "dependent.h"
+#include "shader_program.h"
 
 namespace gfx{
 
 class scene_impl: public scene{
+    std::unique_ptr<shader_program> program_;
+    std::unique_ptr<shader<shader_type::vertex>> vshdr_;
+    std::unique_ptr<shader<shader_type::fragment>> fshdr_;
+
     std::list<volumetric*> volumetrics_;
     std::atomic<bool> modified_{true};
 
@@ -205,10 +211,27 @@ public:
             throw std::logic_error("no active camera is set");
         }
 
+        if (!vshdr_){
+            vshdr_ = shader<shader_type::vertex>::create_default();
+        }
+
+        if (!fshdr_){
+            fshdr_ = shader<shader_type::fragment>::create_default();
+        }
+
+        if (!program_){
+            program_ = std::unique_ptr<shader_program>(new shader_program());
+            program_->attach(vshdr_.get());
+            program_->attach(fshdr_.get());
+            program_->link();
+        }
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(
             clear_color_.x, clear_color_.y, clear_color_.z, clear_color_.w
         );
+
+        program_->use();
 
         std::for_each(std::begin(volumetrics_), std::end(volumetrics_),
             [](volumetric *vol){

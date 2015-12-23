@@ -36,17 +36,21 @@ static const string default_fragment_shader__ =
 
 } // anonymous
 
-unique_ptr<shader> shader::create(
-    type t,
-    const string &code
-){
-    return unique_ptr<shader>(new shader_impl(t, code));
+template<>
+unique_ptr<shader<shader_type::vertex>>
+shader<shader_type::vertex>::create(const string &code){
+    return unique_ptr<shader>(new shader_impl<shader_type::vertex>(code));
 }
 
-unique_ptr<shader> shader::load_from_file(
-    type t,
-    const string &filename
-){
+template<>
+unique_ptr<shader<shader_type::fragment>>
+shader<shader_type::fragment>::create(const string &code){
+    return unique_ptr<shader>(new shader_impl<shader_type::fragment>(code));
+}
+
+template<>
+unique_ptr<shader<shader_type::vertex>>
+shader<shader_type::vertex>::load_from_file(const string &filename){
     ifstream file(filename, ifstream::in);
     if (file){
         string code(
@@ -54,8 +58,8 @@ unique_ptr<shader> shader::load_from_file(
             istreambuf_iterator<char>()
         );
         file.close();
-        return unique_ptr<shader>(
-            new shader_impl(t, code)
+        return unique_ptr<shader<shader_type::vertex>>(
+            new shader_impl<shader_type::vertex>(code)
         );
     }
 
@@ -64,21 +68,40 @@ unique_ptr<shader> shader::load_from_file(
     throw invalid_argument(errmsg.str());
 }
 
-unique_ptr<shader> shader::create_default(type t){
-    switch (t){
-    case vertex:
-        return unique_ptr<shader>(
-            new shader_impl(t, default_vertex_shader__)
+template<>
+unique_ptr<shader<shader_type::fragment>>
+shader<shader_type::fragment>::load_from_file(const string &filename){
+    ifstream file(filename, ifstream::in);
+    if (file){
+        string code(
+            (istreambuf_iterator<char>(file)),
+            istreambuf_iterator<char>()
         );
-    case fragment:
-        return unique_ptr<shader>(
-            new shader_impl(t, default_fragment_shader__)
+        file.close();
+        return unique_ptr<shader<shader_type::fragment>>(
+            new shader_impl<shader_type::fragment>(code)
         );
-    default:
-        throw invalid_argument("unknown type of shader");
     }
 
-    return unique_ptr<shader>(); // just an overrule
+    stringstream errmsg;
+    errmsg << "no such file (" << filename << ")";
+    throw invalid_argument(errmsg.str());
+}
+
+template<>
+unique_ptr<shader<shader_type::vertex>>
+shader<shader_type::vertex>::create_default(){
+    return unique_ptr<shader<shader_type::vertex>>(
+        new shader_impl<shader_type::vertex>(default_vertex_shader__)
+    );
+}
+
+template<>
+unique_ptr<shader<shader_type::fragment>>
+shader<shader_type::fragment>::create_default(){
+    return unique_ptr<shader<shader_type::fragment>>(
+        new shader_impl<shader_type::fragment>(default_fragment_shader__)
+    );
 }
 
 }
