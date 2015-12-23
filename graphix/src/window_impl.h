@@ -161,6 +161,8 @@ public:
                 void(window&, int, int)
             >*
         >(&resize_func);
+
+        glfwSetFramebufferSizeCallback(handle_, glfw_framebuffer_size_callback);
     }
 
     void add(scene *scene_obj) override{
