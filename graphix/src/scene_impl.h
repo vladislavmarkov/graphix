@@ -18,10 +18,6 @@
 #include "dependent.h"
 #include "shader_program.h"
 
-// temp
-#include <iostream>
-// temp
-
 namespace gfx{
 
 class scene_impl: public scene{
@@ -209,7 +205,6 @@ class scene_impl: public scene{
             program_->attach(fshdr_);
             program_->link();
             program_->use();
-            std::cout << "attached linked and used" << std::endl;
         }
     }
 

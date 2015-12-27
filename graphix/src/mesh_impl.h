@@ -5,10 +5,6 @@
 #include <gfx/glall.h>
 #include <gfx/mesh.h>
 
-// temp
-#include <iostream>
-// temp
-
 namespace gfx{
 
 class mesh_impl: public mesh{

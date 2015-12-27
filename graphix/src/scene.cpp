@@ -57,6 +57,7 @@ unique_ptr<scene> scene::load(
         assimpmeshes = assimpscene->mMeshes;
     }
 
+    // temp
     if (assimpscene->HasAnimations()){
         std::cout << "scene has animations" << std::endl;
     }
@@ -80,6 +81,7 @@ unique_ptr<scene> scene::load(
     if (assimpscene->HasTextures()){
         std::cout << "scene has textures" << std::endl;
     }
+    // temp
 
     std::list<std::shared_ptr<mesh>> meshes = convert_meshes(
         assimpmeshes, assimpscene->mNumMeshes

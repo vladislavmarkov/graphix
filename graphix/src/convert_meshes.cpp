@@ -9,10 +9,6 @@
 
 #include "mesh_impl.h"
 
-// temp
-#include <iostream>
-// temp
-
 using glm::vec3;
 using std::begin; using std::end;
 using std::invalid_argument;
