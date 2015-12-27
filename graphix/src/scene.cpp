@@ -4,14 +4,17 @@
 #include <gfx/scene.h>
 #include <memory>
 
-#include "convert_meshes.h"
+#include "assimp-helpers.h"
+#include "node.h"
 #include "scene_impl.h"
 
 // test
 #include <iostream>
 // test
 
+using std::shared_ptr;
 using std::unique_ptr;
+using std::vector;
 
 namespace gfx{
 
@@ -52,11 +55,6 @@ unique_ptr<scene> scene::load(
         throw std::runtime_error(importer.GetErrorString());
     }
 
-    aiMesh **assimpmeshes = nullptr;
-    if (assimpscene->mNumMeshes){
-        assimpmeshes = assimpscene->mMeshes;
-    }
-
     // temp
     if (assimpscene->HasAnimations()){
         std::cout << "scene has animations" << std::endl;
@@ -83,13 +81,20 @@ unique_ptr<scene> scene::load(
     }
     // temp
 
-    std::list<std::shared_ptr<mesh>> meshes = convert_meshes(
-        assimpmeshes, assimpscene->mNumMeshes
-    );
+    shared_ptr<node> root_node = extract_root_node(assimpscene);
+    vector<shared_ptr<mesh>> meshes = extract_meshes(assimpscene);
 
     unique_ptr<scene> result(
         new scene_impl(
-            hfov, width, height, near, far, cam, clear_color, meshes
+            hfov,
+            width,
+            height,
+            near,
+            far,
+            cam,
+            clear_color,
+            root_node,
+            meshes
         )
     );
 

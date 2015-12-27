@@ -42,13 +42,14 @@ add_library(graphixlib SHARED
     public/gfx/shader.h
     public/gfx/window.h
     src/application.cpp
+    src/assimp-helpers.cpp
+    src/assimp-helpers.h
     src/camera.cpp
     src/camera_impl.h
-    src/convert_meshes.cpp
-    src/convert_meshes.h
     src/dependent.h
     src/exception.h
     src/mesh_impl.h
+    src/node.h
     src/scene.cpp
     src/scene_impl.h
     src/shader.cpp

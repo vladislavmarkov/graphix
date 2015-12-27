@@ -11,11 +11,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
-#include <list>
 #include <memory>
 #include <stdexcept>
+#include <vector>
 
 #include "dependent.h"
+#include "node.h"
 #include "shader_program.h"
 
 namespace gfx{
@@ -27,7 +28,8 @@ class scene_impl: public scene{
     std::unique_ptr<shader<shader_type::vertex>> own_vshdr_;
     std::unique_ptr<shader<shader_type::fragment>> own_fshdr_;
 
-    std::list<std::shared_ptr<mesh>> meshes_;
+    std::shared_ptr<node> root_;
+    std::vector<std::shared_ptr<mesh>> meshes_;
     std::atomic<bool> modified_{true};
 
     float hfov_;
@@ -250,9 +252,10 @@ public:
         float far,
         camera *cam,
         glm::vec4 clear_color,
-        std::list<std::shared_ptr<mesh>> meshes
+        std::shared_ptr<node> root,
+        std::vector<std::shared_ptr<mesh>> meshes
     ):
-        vshdr_(nullptr), fshdr_(nullptr), meshes_(meshes),
+        vshdr_(nullptr), fshdr_(nullptr), root_(root), meshes_(meshes),
         hfov_(hfov), size_{width, height}, depth_{near, far},
         nodep_geometrics_(&hfov_, &size_, &depth_),
         projection_(1.0f),
