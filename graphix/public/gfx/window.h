@@ -86,6 +86,14 @@ public:
     \param resize_func self-explanatory.
      */
 
+    virtual void set_refresh_reaction(
+        const std::function<void(window&)> &draw_func
+    ) = 0;
+    /*!<
+    Sets a refresh reaction callback function.
+    \param draw_func self-explanatory.
+     */
+
     virtual void add(scene *scene_obj) = 0;
     /*!<
     Adds a scene to a window.

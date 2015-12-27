@@ -4,6 +4,7 @@
 
 #include <gfx/glall.h>
 #include <gfx/shader.h>
+#include <stdexcept>
 
 namespace gfx{
 
@@ -25,6 +26,12 @@ public:
 
         glShaderSource(handle_, 1, &code_ptr, nullptr);
         glCompileShader(handle_);
+
+        int params = -1;
+        glGetShaderiv(handle_, GL_COMPILE_STATUS, &params);
+        if (GL_TRUE != params){
+            throw std::runtime_error("failed to compile shader");
+        }
     }
 
     ~shader_impl(){

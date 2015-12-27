@@ -5,10 +5,12 @@
 #include <algorithm>
 #include <atomic>
 #include <gfx/glall.h>
+#include <gfx/mesh.h>
 #include <gfx/scene.h>
-#include <gfx/volumetric.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/transform.hpp>
 #include <list>
 #include <memory>
 #include <stdexcept>
@@ -16,14 +18,20 @@
 #include "dependent.h"
 #include "shader_program.h"
 
+// temp
+#include <iostream>
+// temp
+
 namespace gfx{
 
 class scene_impl: public scene{
     std::unique_ptr<shader_program> program_;
-    std::unique_ptr<shader<shader_type::vertex>> vshdr_;
-    std::unique_ptr<shader<shader_type::fragment>> fshdr_;
+    shader<shader_type::vertex> *vshdr_;
+    shader<shader_type::fragment> *fshdr_;
+    std::unique_ptr<shader<shader_type::vertex>> own_vshdr_;
+    std::unique_ptr<shader<shader_type::fragment>> own_fshdr_;
 
-    std::list<volumetric*> volumetrics_;
+    std::list<std::shared_ptr<mesh>> meshes_;
     std::atomic<bool> modified_{true};
 
     float hfov_;
@@ -168,25 +176,44 @@ class scene_impl: public scene{
 
     glm::vec4 clear_color_;
 
-public:
-    scene_impl(
-        float hfov,
-        int width,
-        int height,
-        float near,
-        float far,
-        camera *cam,
-        glm::vec4 clear_color
-    ):
-        hfov_(hfov), size_{width, height}, depth_{near, far},
-        nodep_geometrics_(&hfov_, &size_, &depth_),
-        projection_(1.0f),
-        dep_projection_(&projection_, &hfov_, &size_, &depth_),
-        active_camera_(cam), nodep_camera_(active_camera_),
-        view_(1.0f), dep_view_(&view_, cam),
-        mvp_(1.0f), dep_mvp_(&mvp_, &projection_, &view_),
-        clear_color_(clear_color)
-    {
+    void instantiate_shaders_if_required_(){
+        bool relink_required = false;
+
+        if (!own_vshdr_){
+            own_vshdr_ = shader<shader_type::vertex>::create_default();
+            relink_required = true;
+        }
+
+        if (!vshdr_){
+            vshdr_ = own_vshdr_.get();
+            relink_required = true;
+        }
+
+        if (!own_fshdr_){
+            own_fshdr_ = shader<shader_type::fragment>::create_default();
+            relink_required = true;
+        }
+
+        if (!fshdr_){
+            fshdr_ = own_fshdr_.get();
+            relink_required = true;
+        }
+
+        if (!program_){
+            program_ = std::unique_ptr<shader_program>(new shader_program());
+            relink_required = true;
+        }
+
+        if (relink_required){
+            program_->attach(vshdr_);
+            program_->attach(fshdr_);
+            program_->link();
+            program_->use();
+            std::cout << "attached linked and used" << std::endl;
+        }
+    }
+
+    void init_dependencies(){
         nodep_geometrics_.add_dependency(&dep_projection_);
         nodep_camera_.add_dependency(&dep_view_);
         dep_projection_.add_dependency(&dep_mvp_);
@@ -197,8 +224,54 @@ public:
         nodep_camera_.set(active_camera_);
     }
 
-    void add(volumetric *vol) override{
-        volumetrics_.push_back(vol);
+public:
+    scene_impl(
+        float hfov,
+        int width,
+        int height,
+        float near,
+        float far,
+        camera *cam,
+        glm::vec4 clear_color
+    ):
+        vshdr_(nullptr), fshdr_(nullptr),
+        hfov_(hfov), size_{width, height}, depth_{near, far},
+        nodep_geometrics_(&hfov_, &size_, &depth_),
+        projection_(1.0f),
+        dep_projection_(&projection_, &hfov_, &size_, &depth_),
+        active_camera_(cam), nodep_camera_(active_camera_),
+        view_(1.0f), dep_view_(&view_, cam),
+        mvp_(1.0f), dep_mvp_(&mvp_, &projection_, &view_),
+        clear_color_(clear_color)
+    {
+        init_dependencies();
+    }
+
+    scene_impl(
+        float hfov,
+        int width,
+        int height,
+        float near,
+        float far,
+        camera *cam,
+        glm::vec4 clear_color,
+        std::list<std::shared_ptr<mesh>> meshes
+    ):
+        vshdr_(nullptr), fshdr_(nullptr), meshes_(meshes),
+        hfov_(hfov), size_{width, height}, depth_{near, far},
+        nodep_geometrics_(&hfov_, &size_, &depth_),
+        projection_(1.0f),
+        dep_projection_(&projection_, &hfov_, &size_, &depth_),
+        active_camera_(cam), nodep_camera_(active_camera_),
+        view_(1.0f), dep_view_(&view_, cam),
+        mvp_(1.0f), dep_mvp_(&mvp_, &projection_, &view_),
+        clear_color_(clear_color)
+    {
+        init_dependencies();
+    }
+
+    void add(std::shared_ptr<mesh> obj) override{
+        meshes_.push_back(obj);
         modified_.store(true, std::memory_order_relaxed);
     }
 
@@ -211,31 +284,19 @@ public:
             throw std::logic_error("no active camera is set");
         }
 
-        if (!vshdr_){
-            vshdr_ = shader<shader_type::vertex>::create_default();
-        }
-
-        if (!fshdr_){
-            fshdr_ = shader<shader_type::fragment>::create_default();
-        }
-
-        if (!program_){
-            program_ = std::unique_ptr<shader_program>(new shader_program());
-            program_->attach(vshdr_.get());
-            program_->attach(fshdr_.get());
-            program_->link();
-        }
-
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(
             clear_color_.x, clear_color_.y, clear_color_.z, clear_color_.w
         );
 
+        instantiate_shaders_if_required_();
         program_->use();
+        GLuint mvp_handle = glGetUniformLocation(program_->handle(), "mvp");
+        glUniformMatrix4fv(mvp_handle, 1, GL_FALSE, glm::value_ptr(mvp_));
 
-        std::for_each(std::begin(volumetrics_), std::end(volumetrics_),
-            [](volumetric *vol){
-                if (vol) vol->draw();
+        std::for_each(std::begin(meshes_), std::end(meshes_),
+            [](std::shared_ptr<mesh> obj){
+                if (obj) obj->draw();
             }
         );
 

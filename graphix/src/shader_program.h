@@ -36,6 +36,10 @@ public:
         glDeleteProgram(handle_);
     }
 
+    GLuint handle() const{
+        return handle_;
+    }
+
     void attach(shader<shader_type::vertex> *vshdr){
         if (vshdr_){
             glDetachShader(handle_, vshdr_->get_handle());
@@ -54,7 +58,18 @@ public:
         glAttachShader(handle_, fshdr_->get_handle());
     }
 
-    void link(){ glLinkProgram(handle_); }
+    void link(){
+        glLinkProgram(handle_);
+
+        glValidateProgram(handle_);
+
+        int params = -1;
+        glGetProgramiv(handle_, GL_VALIDATE_STATUS, &params);
+        if (GL_TRUE != params){
+            throw std::runtime_error("program is invalid");
+        }
+    }
+
     void use(){ glUseProgram(handle_); }
 };
 

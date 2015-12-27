@@ -22,15 +22,16 @@ class window_impl: public window{
 
     // user context, used by user callback functions
     struct user_context{
-        window *wnd_;
+        window_impl *wnd_impl_{nullptr};
+        window *wnd_{nullptr};
 
         std::function<
             void(window &wnd, key::code, key::state)
-        > *key_func_;
+        > *key_func_{nullptr};
 
-        std::function<
-            void(window &wnd, int, int)
-        > *resize_func_;
+        std::function<void(window &wnd, int, int)> *resize_func_{nullptr};
+
+        std::function<void(window&)> *draw_func_{nullptr};
     } user_context_;
 
     std::list<scene_impl*> scenes_;
@@ -54,6 +55,16 @@ public:
         if (!handle_){
             throw std::runtime_error("failed to create window");
         }
+    }
+
+    void init_callbacks(){
+        user_context_.wnd_ = this;
+        user_context_.wnd_impl_ = this;
+
+        glfwSetWindowUserPointer(handle_, &user_context_);
+
+        glfwSetFramebufferSizeCallback(handle_, glfw_framebuffer_size_callback);
+        glfwSetWindowRefreshCallback(handle_, glfw_refresh_callback);
     }
 
     ~window_impl() override{
@@ -145,7 +156,9 @@ public:
             glfwGetWindowUserPointer(handle)
         );
 
-        if (uc && uc->wnd_){
+        if (uc && uc->wnd_ && uc->wnd_impl_){
+            uc->wnd_impl_->resize(width, height);
+
             if (uc->resize_func_){
                 (*uc->resize_func_)(*uc->wnd_, width, height);
             }
@@ -153,9 +166,10 @@ public:
     }
 
     void set_resize_reaction(
-        const std::function<void(window &wnd, int, int)> &resize_func
+        const std::function<void(window&, int, int)> &resize_func
     ) override{
         user_context_.wnd_ = this;
+        user_context_.wnd_impl_ = this;
         user_context_.resize_func_ = const_cast<
             std::function<
                 void(window&, int, int)
@@ -163,6 +177,32 @@ public:
         >(&resize_func);
 
         glfwSetFramebufferSizeCallback(handle_, glfw_framebuffer_size_callback);
+    }
+
+    static void glfw_refresh_callback(GLFWwindow *handle){
+        user_context *uc = reinterpret_cast<user_context*>(
+            glfwGetWindowUserPointer(handle)
+        );
+
+        if (uc && uc->wnd_ && uc->wnd_impl_){
+            uc->wnd_impl_->draw();
+
+            if (uc->draw_func_){
+                (*uc->draw_func_)(*uc->wnd_);
+            }
+        }
+    }
+
+    void set_refresh_reaction(
+        const std::function<void(window&)> &draw_func
+    ) override{
+        user_context_.wnd_ = this;
+        user_context_.wnd_impl_ = this;
+        user_context_.draw_func_ = const_cast<
+            std::function<void(window&)>*
+        >(&draw_func);
+
+        glfwSetWindowRefreshCallback(handle_, glfw_refresh_callback);
     }
 
     void add(scene *scene_obj) override{

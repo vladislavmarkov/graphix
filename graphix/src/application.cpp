@@ -40,9 +40,14 @@ int run(window &main_window){
         throw glew_error("failed to initialize glew");
     }
 
-    while (!glfwWindowShouldClose(handle)){
-        main_window_impl.draw();
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glDepthFunc(GL_LESS);
 
+    main_window_impl.init_callbacks();
+
+    while (!glfwWindowShouldClose(handle)){
         glfwSwapBuffers(handle);
         glfwWaitEvents();
     }

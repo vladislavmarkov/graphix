@@ -7,9 +7,11 @@ set(PROJECT_DESCRIPTION "Graphix is a OpenGL C++ wrapper library.")
 include(FindPkgConfig)
 find_package(PkgConfig REQUIRED)
 
+set(ASSIMP_REQUIRED_VERSION "assimp >= 3.2")
 set(GLEW_REQUIRED_VERSION "glew >= 1.10.0")
 set(GLFW3_REQUIRED_VERSION "glfw3 >= 3.1.2")
 
+pkg_check_modules(ASSIMP REQUIRED ${ASSIMP_REQUIRED_VERSION})
 pkg_check_modules(GLEW REQUIRED ${GLEW_REQUIRED_VERSION})
 pkg_check_modules(GLFW3 REQUIRED ${GLFW3_REQUIRED_VERSION})
 
@@ -35,15 +37,18 @@ add_library(graphixlib SHARED
     public/gfx/drawable.h
     public/gfx/graphix.h
     public/gfx/key.h
+    public/gfx/mesh.h
     public/gfx/scene.h
     public/gfx/shader.h
-    public/gfx/volumetric.h
     public/gfx/window.h
     src/application.cpp
     src/camera.cpp
     src/camera_impl.h
+    src/convert_meshes.cpp
+    src/convert_meshes.h
     src/dependent.h
     src/exception.h
+    src/mesh_impl.h
     src/scene.cpp
     src/scene_impl.h
     src/shader.cpp
@@ -59,6 +64,7 @@ set_target_properties(graphixlib
 
 target_include_directories(graphixlib
     PUBLIC
+        ${ASSIMP_INCLUDE_DIRS}
         ${Boost_INCLUDE_DIRS}
         ${GLEW_INCLUDE_DIRS}
         ${GLFW3_INCLUDE_DIRS}
@@ -68,11 +74,13 @@ target_include_directories(graphixlib
 )
 
 link_directories(
+    ${ASSIMP_LIBRARY_DIRS}
     ${GLEW_LIBRARY_DIRS}
     ${GLFW3_LIBRARY_DIRS}
 )
 
 target_link_libraries(graphixlib
+    ${ASSIMP_LIBRARIES}
     ${GLEW_LIBRARIES}
     ${GLFW3_LIBRARIES}
     ${GLFW3_STATIC_LIBRARIES}
@@ -100,7 +108,7 @@ set(CPACK_PACKAGE_FILE_NAME
 
 set(CPACK_STRIP_FILES FALSE)
 
-set(PKG_CONFIG_REQUIRES "${GLEW_REQUIRED_VERSION} ${GLFW3_REQUIRED_VERSION}")
+set(PKG_CONFIG_REQUIRES "${ASSIMP_REQUIRED_VERSION} ${GLEW_REQUIRED_VERSION} ${GLFW3_REQUIRED_VERSION}")
 
 set(PKG_CONFIG_LIBDIR "\${prefix}/lib")
 

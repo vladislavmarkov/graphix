@@ -20,18 +20,18 @@ namespace gfx{
 namespace { // anonymous
 
 static const string default_vertex_shader__ =
-    "#440\n"
+    "#version 440\n"
     "in vec3 vertex_position;\n"
+    "uniform mat4 mvp;\n"
     "void main(){\n"
-    "    gl_Position = vec4(vertex_position, 1.0);\n"
+    "    gl_Position = mvp * vec4(vertex_position, 1.0);\n"
     "}";
 
 static const string default_fragment_shader__ =
-    "#440\n"
-    "uniform vec4 color;\n"
+    "#version 440\n"
     "out vec4 frag_color;\n"
     "void main(){\n"
-    "    frag_color = color;\n"
+    "    frag_color = vec4(1.0, 1.0, 1.0, 1.0);\n"
     "}";
 
 } // anonymous
