@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <assimp/mesh.h>
 #include <assimp/scene.h>
 #include <gfx/mesh.h>
@@ -15,6 +16,7 @@
 
 using glm::vec3;
 using std::begin; using std::end;
+using std::for_each;
 using std::invalid_argument;
 using std::list;
 using std::shared_ptr;
@@ -70,38 +72,38 @@ shared_ptr<node> convert_node(const aiNode *assimpn){
 
     shared_ptr<node> result(new node(nullptr, assimpn->mName.C_Str()));
 
-    std::cout << "converted node: \"" << assimpn->mName.C_Str() << std::endl;
+    // std::cout << "converted node: \"" << assimpn->mName.C_Str() << std::endl;
 
-    glm::mat4 t(
+    result->transformation_ = std::move(glm::mat4(
         glm::vec4(
             assimpn->mTransformation.a1,
-            assimpn->mTransformation.a2,
-            assimpn->mTransformation.a3,
-            assimpn->mTransformation.a4
-        ),
-        glm::vec4(
             assimpn->mTransformation.b1,
-            assimpn->mTransformation.b2,
-            assimpn->mTransformation.b3,
-            assimpn->mTransformation.b4
-        ),
-        glm::vec4(
             assimpn->mTransformation.c1,
-            assimpn->mTransformation.c2,
-            assimpn->mTransformation.c3,
-            assimpn->mTransformation.c4
+            assimpn->mTransformation.d1
         ),
         glm::vec4(
-            assimpn->mTransformation.d1,
-            assimpn->mTransformation.d2,
-            assimpn->mTransformation.d3,
+            assimpn->mTransformation.a2,
+            assimpn->mTransformation.b2,
+            assimpn->mTransformation.c2,
+            assimpn->mTransformation.d2
+        ),
+        glm::vec4(
+            assimpn->mTransformation.a3,
+            assimpn->mTransformation.b3,
+            assimpn->mTransformation.c3,
+            assimpn->mTransformation.d3
+        ),
+        glm::vec4(
+            assimpn->mTransformation.a4,
+            assimpn->mTransformation.b4,
+            assimpn->mTransformation.c4,
             assimpn->mTransformation.d4
         )
-    );
+    ));
 
-    result->set_transformation(t);
-
+    #if 0
     // temp
+    glm::mat4 &t = result->transformation_;
     std::cout
         << "transformation: " << std::endl
         << t[0][0] << ", " << t[0][1] << ", " << t[0][2] << ", " << t[0][3] << std::endl
@@ -109,9 +111,10 @@ shared_ptr<node> convert_node(const aiNode *assimpn){
         << t[2][0] << ", " << t[2][1] << ", " << t[2][2] << ", " << t[2][3] << std::endl
         << t[3][0] << ", " << t[3][1] << ", " << t[3][2] << ", " << t[3][3] << std::endl;
     // temp
+    #endif
 
     for (size_t i = 0; i < assimpn->mNumMeshes; ++i){
-        result->add_mesh_index(assimpn->mMeshes[i]);
+        result->mesh_indices_.push_back(assimpn->mMeshes[i]);
     }
 
     return result;
@@ -146,8 +149,6 @@ shared_ptr<node> extract_root_node(const aiScene *assimpscene){
         throw invalid_argument("invalid scene object");
     }
 
-    shared_ptr<node> result;
-
     aiNode *airoot = assimpscene->mRootNode;
     shared_ptr<node> root = convert_node(airoot);
 
@@ -165,11 +166,16 @@ shared_ptr<node> extract_root_node(const aiScene *assimpscene){
             ainodes.push(aicurrent->mChildren[i]);
             shared_ptr<node> tmp(convert_node(aicurrent->mChildren[i]));
             nodes.push(tmp.get());
-            current->add_child(tmp);
+            current->children_.emplace_back(tmp);
+            for_each(begin(current->children_), end(current->children_),
+                [&current](shared_ptr<node> &n){
+                    n->parent_ = current;
+                }
+            );
         }
     }
 
-    return result;
+    return root;
 }
 
 }

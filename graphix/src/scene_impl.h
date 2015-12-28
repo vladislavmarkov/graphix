@@ -12,12 +12,17 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 #include <memory>
+#include <stack>
 #include <stdexcept>
 #include <vector>
 
 #include "dependent.h"
 #include "node.h"
 #include "shader_program.h"
+
+// temp
+#include <iostream>
+// temp
 
 namespace gfx{
 
@@ -170,6 +175,10 @@ class scene_impl: public scene{
                 *mvp_ = *projection_ * *view_;
             }
         }
+
+        void set(glm::mat4 mvp){
+            *mvp_ = std::move(mvp);
+        }
     } dep_mvp_;
 
     glm::vec4 clear_color_;
@@ -288,15 +297,36 @@ public:
         );
 
         instantiate_shaders_if_required_();
-        program_->use();
-        GLuint mvp_handle = glGetUniformLocation(program_->handle(), "mvp");
-        glUniformMatrix4fv(mvp_handle, 1, GL_FALSE, glm::value_ptr(mvp_));
 
-        std::for_each(std::begin(meshes_), std::end(meshes_),
-            [](std::shared_ptr<mesh> obj){
-                if (obj) obj->draw();
-            }
-        );
+        std::stack<node*> nodes;
+        nodes.push(root_.get());
+        while (!nodes.empty()){
+            node *current = nodes.top();
+            nodes.pop();
+            if (!current) continue;
+            dep_mvp_.set(
+                projection_ * view_ * current->transformation_
+            );
+
+            program_->use();
+            GLuint mvp_handle = glGetUniformLocation(program_->handle(), "mvp");
+            glUniformMatrix4fv(mvp_handle, 1, GL_FALSE, glm::value_ptr(mvp_));
+            std::for_each(
+                std::begin(current->mesh_indices_),
+                std::end(current->mesh_indices_),
+                [this](unsigned int idx){
+                    if (meshes_[idx]) meshes_[idx]->draw();
+                }
+            );
+
+            std::for_each(
+                std::begin(current->children_),
+                std::end(current->children_),
+                [&nodes](std::shared_ptr<node> &n){
+                    if (n) nodes.push(n.get());
+                }
+            );
+        }
 
         modified_.store(false, std::memory_order_relaxed);
     }

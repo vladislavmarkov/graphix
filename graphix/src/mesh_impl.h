@@ -5,6 +5,10 @@
 #include <gfx/glall.h>
 #include <gfx/mesh.h>
 
+// temp
+#include <iostream>
+// temp
+
 namespace gfx{
 
 class mesh_impl: public mesh{
@@ -12,6 +16,8 @@ class mesh_impl: public mesh{
     std::vector<glm::vec3> vertices_;
     std::vector<unsigned int> faces_;
     GLuint vao_{0};
+
+    bool inited_{false};
 
     GLuint elementbuffer_;
     GLuint buffer_;
@@ -68,14 +74,14 @@ public:
     }
 
     void draw() override{
-        static bool once = init(); (void)once;
+        if (!inited_) init();
 
         glBindVertexArray(vao_);
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
 
         glDrawElements(
-            GL_TRIANGLES,
+            GL_POINTS,
             static_cast<int>(faces_.size()),
             GL_UNSIGNED_INT,
             0
