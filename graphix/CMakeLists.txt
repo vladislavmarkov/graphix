@@ -34,7 +34,6 @@ add_definitions(
 add_library(graphixlib SHARED
     public/gfx/application.h
     public/gfx/camera.h
-    public/gfx/drawable.h
     public/gfx/graphix.h
     public/gfx/key.h
     public/gfx/mesh.h

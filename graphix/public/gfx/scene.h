@@ -3,7 +3,6 @@
 #define __GFX_SCENE_H__
 
 #include <gfx/camera.h>
-#include <gfx/drawable.h>
 #include <gfx/mesh.h>
 #include <glm/glm.hpp>
 #include <memory>
