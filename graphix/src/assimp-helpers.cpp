@@ -31,6 +31,21 @@ namespace gfx{
 
 namespace { // anoynmous
 
+primitive_type convert_primitive_type(unsigned int aitype){
+    switch (aitype){
+    case aiPrimitiveType_POINT:
+        return primitive_type::point;
+    case aiPrimitiveType_LINE:
+        return primitive_type::line;
+    case aiPrimitiveType_TRIANGLE:
+        return primitive_type::triangle;
+    case aiPrimitiveType_POLYGON:
+        return primitive_type::polygon;
+    }
+
+    throw invalid_argument("primitive type is uknown");
+}
+
 shared_ptr<mesh> convert_mesh(const aiMesh *assimpm){
     if (!assimpm){
         throw invalid_argument("mesh is null");
@@ -61,6 +76,8 @@ shared_ptr<mesh> convert_mesh(const aiMesh *assimpm){
     mesh_impl *m = new mesh_impl(
         string(assimpm->mName.C_Str()), vertices, faces
     );
+
+    m->set_primitive_type(convert_primitive_type(assimpm->mPrimitiveTypes));
 
     return shared_ptr<mesh>(m);
 }

@@ -1,4 +1,5 @@
 #include <assimp/Importer.hpp>
+#include <assimp/mesh.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <gfx/scene.h>
@@ -13,12 +14,11 @@
 // test
 
 using std::shared_ptr;
-using std::unique_ptr;
 using std::vector;
 
 namespace gfx{
 
-unique_ptr<scene> scene::create(
+shared_ptr<scene> scene::create(
     float hfov,
     int width,
     int height,
@@ -27,12 +27,12 @@ unique_ptr<scene> scene::create(
     camera *cam,
     glm::vec4 clear_color
 ){
-    return unique_ptr<scene>(
+    return shared_ptr<scene>(
         new scene_impl(hfov, width, height, near, far, cam, clear_color)
     );
 }
 
-unique_ptr<scene> scene::load(
+shared_ptr<scene> scene::load(
     float hfov,
     int width,
     int height,
@@ -43,12 +43,18 @@ unique_ptr<scene> scene::load(
     const std::string &filename
 ){
     Assimp::Importer importer;
+    importer.SetPropertyInteger(
+        AI_CONFIG_PP_SBP_REMOVE,
+        aiPrimitiveType_POINT | aiPrimitiveType_LINE
+    );
+
     const aiScene* assimpscene = importer.ReadFile(
         filename,
         aiProcess_CalcTangentSpace |
-        aiProcess_Triangulate |
+        aiProcess_FindDegenerates |
         aiProcess_JoinIdenticalVertices |
-        aiProcess_SortByPType
+        aiProcess_SortByPType |
+        aiProcess_Triangulate
     );
 
     if (!assimpscene){
@@ -84,7 +90,7 @@ unique_ptr<scene> scene::load(
     shared_ptr<node> root_node = extract_root_node(assimpscene);
     vector<shared_ptr<mesh>> meshes = extract_meshes(assimpscene);
 
-    unique_ptr<scene> result(
+    shared_ptr<scene> result(
         new scene_impl(
             hfov,
             width,
@@ -93,8 +99,8 @@ unique_ptr<scene> scene::load(
             far,
             cam,
             clear_color,
-            root_node,
-            meshes
+            std::move(root_node),
+            std::move(meshes)
         )
     );
 

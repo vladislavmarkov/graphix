@@ -11,10 +11,18 @@
 
 namespace gfx{
 
+enum class primitive_type: unsigned int{
+    point = GL_POINTS,
+    line = GL_LINES,
+    triangle = GL_TRIANGLES,
+    polygon = GL_POLYGON
+};
+
 class mesh_impl: public mesh{
     const std::string name_;
     std::vector<glm::vec3> vertices_;
     std::vector<unsigned int> faces_;
+    primitive_type pri_type_{primitive_type::point};
     GLuint vao_{0};
 
     bool inited_{false};
@@ -32,6 +40,16 @@ public:
         vertices_(vertices),
         faces_(faces)
     {}
+
+    ~mesh_impl() override{
+        glDeleteBuffers(1, &buffer_);
+        glDeleteBuffers(1, &elementbuffer_);
+        glDeleteVertexArrays(1, &vao_);
+    }
+
+    void set_primitive_type(primitive_type type){
+        pri_type_ = type;
+    }
 
     std::string name() const override{
         return name_;
@@ -63,29 +81,28 @@ public:
         glBindVertexArray(vao_);
 
         glBindBuffer(GL_ARRAY_BUFFER, buffer_);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer_);
-        glVertexAttribPointer(1, 3, GL_UNSIGNED_INT, GL_FALSE, 0, nullptr);
-
         glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+        glDisableVertexAttribArray(0);
 
         return true;
     }
 
     void draw() override{
-        if (!inited_) init();
+        if (!inited_) inited_ = init();
 
         glBindVertexArray(vao_);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer_);
         glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
 
         glDrawElements(
-            GL_POINTS,
+            GL_POINTS, // static_cast<GLenum>(pri_type_),
             static_cast<int>(faces_.size()),
             GL_UNSIGNED_INT,
             0
         );
+
+        glDisableVertexAttribArray(0);
     }
 };
 

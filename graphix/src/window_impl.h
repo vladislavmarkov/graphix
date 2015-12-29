@@ -9,8 +9,6 @@
 #include <list>
 #include <stdexcept>
 
-#include "scene_impl.h"
-
 namespace gfx{
 
 class window_impl: public window{
@@ -34,7 +32,7 @@ class window_impl: public window{
         std::function<void(window&)> *draw_func_{nullptr};
     } user_context_;
 
-    std::list<scene_impl*> scenes_;
+    std::list<std::weak_ptr<scene>> scenes_;
 
 public:
     window_impl(
@@ -205,26 +203,34 @@ public:
         glfwSetWindowRefreshCallback(handle_, glfw_refresh_callback);
     }
 
-    void add(scene *scene_obj) override{
-        scenes_.push_back(dynamic_cast<scene_impl*>(scene_obj));
+    void add(std::shared_ptr<scene> scene_obj) override{
+        scenes_.push_back(scene_obj);
+    }
+
+    void hide_mouse_cursor() const override{
+        glfwSetInputMode(handle_, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+    }
+
+    void show_mouse_cursor() const override{
+        glfwSetInputMode(handle_, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
 
     void resize(int width, int height){
         std::for_each(std::begin(scenes_), std::end(scenes_),
-            [&width, &height](scene_impl *scene_obj){
-                if (scene_obj){
-                    scene_obj->resize(width, height);
-                }
+            [&width, &height](std::weak_ptr<scene> &scene_obj){
+                std::shared_ptr<scene> s = scene_obj.lock();
+                if (s) s->resize(width, height);
             }
         );
+
+        draw();
     }
 
     void draw(){
         std::for_each(std::begin(scenes_), std::end(scenes_),
-            [](scene_impl *scene_obj){
-                if (scene_obj){
-                    scene_obj->draw();
-                }
+            [](std::weak_ptr<scene> &scene_obj){
+                std::shared_ptr<scene> s = scene_obj.lock();
+                if (s) s->draw();
             }
         );
     }

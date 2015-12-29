@@ -261,10 +261,11 @@ public:
         float far,
         camera *cam,
         glm::vec4 clear_color,
-        std::shared_ptr<node> root,
-        std::vector<std::shared_ptr<mesh>> meshes
+        std::shared_ptr<node> &&root,
+        std::vector<std::shared_ptr<mesh>> &&meshes
     ):
-        vshdr_(nullptr), fshdr_(nullptr), root_(root), meshes_(meshes),
+        vshdr_(nullptr), fshdr_(nullptr),
+        root_(std::move(root)), meshes_(std::move(meshes)),
         hfov_(hfov), size_{width, height}, depth_{near, far},
         nodep_geometrics_(&hfov_, &size_, &depth_),
         projection_(1.0f),
@@ -282,11 +283,11 @@ public:
         modified_.store(true, std::memory_order_relaxed);
     }
 
-    void resize(int width, int height){
+    void resize(int width, int height) override{
         nodep_geometrics_.set(size{width, height});
     }
 
-    void draw(){
+    void draw() override{
         if (!active_camera_){
             throw std::logic_error("no active camera is set");
         }
@@ -297,6 +298,10 @@ public:
         );
 
         instantiate_shaders_if_required_();
+
+        if (active_camera_->was_moved()){
+            dep_view_.adjust();
+        }
 
         std::stack<node*> nodes;
         nodes.push(root_.get());
@@ -332,7 +337,7 @@ public:
     }
 
     void set_camera(camera *cam) override{
-        active_camera_ = cam;
+        nodep_camera_.set(cam);
         modified_.store(true, std::memory_order_relaxed);
     }
 };

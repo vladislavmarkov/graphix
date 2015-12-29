@@ -18,6 +18,9 @@ public:
     virtual void set_up_vector(const glm::vec3 &up) = 0;
     virtual glm::vec3 get_up_vector() const = 0;
 
+    virtual void shot() const = 0;
+    virtual bool was_moved() const = 0;
+
     static std::unique_ptr<camera> create(
         const glm::vec3 &position,
         const glm::vec3 &direction,

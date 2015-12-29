@@ -94,10 +94,20 @@ public:
     \param draw_func self-explanatory.
      */
 
-    virtual void add(scene *scene_obj) = 0;
+    virtual void add(std::shared_ptr<scene> scene_obj) = 0;
     /*!<
     Adds a scene to a window.
     \param scene_obj scene to be added.
+     */
+
+    virtual void hide_mouse_cursor() const = 0;
+    /*!<
+    Hides mouse cursor.
+     */
+
+    virtual void show_mouse_cursor() const = 0;
+    /*!<
+    Shows mouse cursor.
      */
 
     static std::unique_ptr<window> create(

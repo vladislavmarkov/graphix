@@ -9,6 +9,7 @@ namespace gfx{
 
 class mesh{
 public:
+    virtual ~mesh() = default;
     virtual std::string name() const = 0;
     virtual void draw() = 0;
 

@@ -53,11 +53,11 @@ public:
         return up_vector_;
     }
 
-    void shot() const{
+    void shot() const override{
         modified_.store(false, std::memory_order_relaxed);
     }
 
-    bool was_moved() const{
+    bool was_moved() const override{
         return modified_.load(std::memory_order_relaxed);
     }
 };

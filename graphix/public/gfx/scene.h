@@ -12,10 +12,13 @@ namespace gfx{
 
 class scene{
 public:
+    virtual ~scene() = default;
     virtual void add(std::shared_ptr<mesh> obj) = 0;
+    virtual void draw() = 0;
+    virtual void resize(int, int) = 0;
     virtual void set_camera(camera *cam) = 0;
 
-    static std::unique_ptr<scene> create(
+    static std::shared_ptr<scene> create(
         float hfov,
         int width,
         int height,
@@ -25,7 +28,7 @@ public:
         glm::vec4 clear_color
     );
 
-    static std::unique_ptr<scene> load(
+    static std::shared_ptr<scene> load(
         float hfov,
         int width,
         int height,
