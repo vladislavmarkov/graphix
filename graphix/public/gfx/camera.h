@@ -9,23 +9,20 @@ namespace gfx{
 
 class camera{
 public:
-    virtual void set_position(const glm::vec3 &position) = 0;
+    virtual glm::mat4 get_matrix() const = 0;
+    virtual glm::vec3 get_backward() const = 0;
+    virtual glm::vec3 get_down() const = 0;
+    virtual glm::vec3 get_forward() const = 0;
+    virtual glm::vec3 get_left() const = 0;
     virtual glm::vec3 get_position() const = 0;
-
-    virtual void set_direction(const glm::vec3 &direction) = 0;
-    virtual glm::vec3 get_direction() const = 0;
-
-    virtual void set_up_vector(const glm::vec3 &up) = 0;
-    virtual glm::vec3 get_up_vector() const = 0;
+    virtual glm::vec3 get_right() const = 0;
+    virtual glm::vec3 get_up() const = 0;
+    virtual void set_matrix(glm::mat4 m) = 0;
 
     virtual void shot() const = 0;
     virtual bool was_moved() const = 0;
 
-    static std::unique_ptr<camera> create(
-        const glm::vec3 &position,
-        const glm::vec3 &direction,
-        const glm::vec3 &up_vector
-    );
+    static std::shared_ptr<camera> create(glm::mat4 mx);
 };
 
 }

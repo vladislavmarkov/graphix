@@ -4,16 +4,12 @@
 
 #include "camera_impl.h"
 
-using std::unique_ptr;
+using std::shared_ptr;
 
 namespace gfx{
 
-unique_ptr<camera> camera::create(
-    const glm::vec3 &position,
-    const glm::vec3 &direction,
-    const glm::vec3 &up_vector
-){
-    return unique_ptr<camera>(new camera_impl(position, direction, up_vector));
+shared_ptr<camera> camera::create(glm::mat4 mx){
+    return shared_ptr<camera>(new camera_impl(std::move(mx)));
 }
 
 }

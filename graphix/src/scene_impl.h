@@ -2,31 +2,22 @@
 #ifndef __GFX_SCENE_IMPL_H__
 #define __GFX_SCENE_IMPL_H__
 
-#include <algorithm>
 #include <atomic>
-#include <gfx/glall.h>
-#include <gfx/mesh.h>
+#include <gfx/movement.h>
 #include <gfx/scene.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/transform.hpp>
 #include <memory>
-#include <stack>
-#include <stdexcept>
-#include <vector>
 
 #include "dependent.h"
-#include "node.h"
 #include "shader_program.h"
-
-// temp
-#include <iostream>
-// temp
 
 namespace gfx{
 
+class window_impl;
+
 class scene_impl: public scene{
+    window_impl *parent_{nullptr};
     std::unique_ptr<shader_program> program_;
     shader<shader_type::vertex> *vshdr_;
     shader<shader_type::fragment> *fshdr_;
@@ -34,8 +25,8 @@ class scene_impl: public scene{
     std::unique_ptr<shader<shader_type::fragment>> own_fshdr_;
 
     std::shared_ptr<node> root_;
-    std::vector<std::shared_ptr<mesh>> meshes_;
-    std::atomic<bool> modified_{true};
+    std::vector<std::shared_ptr<drawable>> drawables_;
+    std::vector<std::shared_ptr<movement>> movements_;
 
     float hfov_;
 
@@ -135,44 +126,21 @@ class scene_impl: public scene{
         }
     } nodep_camera_;
 
-    glm::mat4 view_;
-
-    class dep_view: public dependent{
-        glm::mat4 *view_;
-        camera *camera_;
-
-    public:
-        dep_view(glm::mat4 *view, camera *cam):
-            view_(view),
-            camera_(cam)
-        {}
-
-        void adjust() override{
-            if (view_ && camera_){
-                *view_ = glm::lookAt(
-                    camera_->get_position(),
-                    camera_->get_position() + camera_->get_direction(),
-                    camera_->get_up_vector()
-                );
-            }
-        }
-    } dep_view_;
-
     glm::mat4 mvp_;
 
     class dep_mvp: public dependent{
         glm::mat4 *mvp_;
         glm::mat4 *projection_;
-        glm::mat4 *view_;
+        camera *cam_;
 
     public:
-        dep_mvp(glm::mat4 *mvp, glm::mat4 *projection, glm::mat4 *view):
-            mvp_(mvp), projection_(projection), view_(view)
+        dep_mvp(glm::mat4 *mvp, glm::mat4 *projection, camera *cam):
+            mvp_(mvp), projection_(projection), cam_(cam)
         {}
 
         void adjust() override{
-            if (mvp_ && view_ && projection_){
-                *mvp_ = *projection_ * *view_;
+            if (mvp_ && cam_ && projection_){
+                *mvp_ = *projection_ * cam_->get_matrix();
             }
         }
 
@@ -183,52 +151,12 @@ class scene_impl: public scene{
 
     glm::vec4 clear_color_;
 
-    void instantiate_shaders_if_required_(){
-        bool relink_required = false;
+    void instantiate_shaders_if_required_();
+    void init_dependencies();
 
-        if (!own_vshdr_){
-            own_vshdr_ = shader<shader_type::vertex>::create_default();
-            relink_required = true;
-        }
+    void draw() override;
 
-        if (!vshdr_){
-            vshdr_ = own_vshdr_.get();
-            relink_required = true;
-        }
-
-        if (!own_fshdr_){
-            own_fshdr_ = shader<shader_type::fragment>::create_default();
-            relink_required = true;
-        }
-
-        if (!fshdr_){
-            fshdr_ = own_fshdr_.get();
-            relink_required = true;
-        }
-
-        if (!program_){
-            program_ = std::unique_ptr<shader_program>(new shader_program());
-            relink_required = true;
-        }
-
-        if (relink_required){
-            program_->attach(vshdr_);
-            program_->attach(fshdr_);
-            program_->link();
-            program_->use();
-        }
-    }
-
-    void init_dependencies(){
-        nodep_geometrics_.add_dependency(&dep_projection_);
-        nodep_camera_.add_dependency(&dep_view_);
-        dep_projection_.add_dependency(&dep_mvp_);
-        dep_view_.add_dependency(&dep_mvp_);
-
-        // update everything in a dependency tree
-        nodep_geometrics_.set(hfov_, size_, depth_);
-        nodep_camera_.set(active_camera_);
-    }
+    friend class window_impl;
 
 public:
     scene_impl(
@@ -239,19 +167,7 @@ public:
         float far,
         camera *cam,
         glm::vec4 clear_color
-    ):
-        vshdr_(nullptr), fshdr_(nullptr),
-        hfov_(hfov), size_{width, height}, depth_{near, far},
-        nodep_geometrics_(&hfov_, &size_, &depth_),
-        projection_(1.0f),
-        dep_projection_(&projection_, &hfov_, &size_, &depth_),
-        active_camera_(cam), nodep_camera_(active_camera_),
-        view_(1.0f), dep_view_(&view_, cam),
-        mvp_(1.0f), dep_mvp_(&mvp_, &projection_, &view_),
-        clear_color_(clear_color)
-    {
-        init_dependencies();
-    }
+    );
 
     scene_impl(
         float hfov,
@@ -262,84 +178,24 @@ public:
         camera *cam,
         glm::vec4 clear_color,
         std::shared_ptr<node> &&root,
-        std::vector<std::shared_ptr<mesh>> &&meshes
-    ):
-        vshdr_(nullptr), fshdr_(nullptr),
-        root_(std::move(root)), meshes_(std::move(meshes)),
-        hfov_(hfov), size_{width, height}, depth_{near, far},
-        nodep_geometrics_(&hfov_, &size_, &depth_),
-        projection_(1.0f),
-        dep_projection_(&projection_, &hfov_, &size_, &depth_),
-        active_camera_(cam), nodep_camera_(active_camera_),
-        view_(1.0f), dep_view_(&view_, cam),
-        mvp_(1.0f), dep_mvp_(&mvp_, &projection_, &view_),
-        clear_color_(clear_color)
-    {
-        init_dependencies();
-    }
+        std::vector<std::shared_ptr<drawable>> &&drawables
+    );
 
-    void add(std::shared_ptr<mesh> obj) override{
-        meshes_.push_back(obj);
-        modified_.store(true, std::memory_order_relaxed);
-    }
+    void add(
+        std::shared_ptr<node> n,
+        std::shared_ptr<drawable> d,
+        const std::string &parent
+    ) override;
 
-    void resize(int width, int height) override{
-        nodep_geometrics_.set(size{width, height});
-    }
+    void add(std::shared_ptr<movement> m) override;
 
-    void draw() override{
-        if (!active_camera_){
-            throw std::logic_error("no active camera is set");
-        }
+    void make_frame() override;
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearColor(
-            clear_color_.x, clear_color_.y, clear_color_.z, clear_color_.w
-        );
+    void request_redraw() override;
 
-        instantiate_shaders_if_required_();
+    void resize(int width, int height) override;
 
-        if (active_camera_->was_moved()){
-            dep_view_.adjust();
-        }
-
-        std::stack<node*> nodes;
-        nodes.push(root_.get());
-        while (!nodes.empty()){
-            node *current = nodes.top();
-            nodes.pop();
-            if (!current) continue;
-            dep_mvp_.set(
-                projection_ * view_ * current->transformation_
-            );
-
-            program_->use();
-            GLuint mvp_handle = glGetUniformLocation(program_->handle(), "mvp");
-            glUniformMatrix4fv(mvp_handle, 1, GL_FALSE, glm::value_ptr(mvp_));
-            std::for_each(
-                std::begin(current->mesh_indices_),
-                std::end(current->mesh_indices_),
-                [this](unsigned int idx){
-                    if (meshes_[idx]) meshes_[idx]->draw();
-                }
-            );
-
-            std::for_each(
-                std::begin(current->children_),
-                std::end(current->children_),
-                [&nodes](std::shared_ptr<node> &n){
-                    if (n) nodes.push(n.get());
-                }
-            );
-        }
-
-        modified_.store(false, std::memory_order_relaxed);
-    }
-
-    void set_camera(camera *cam) override{
-        nodep_camera_.set(cam);
-        modified_.store(true, std::memory_order_relaxed);
-    }
+    void set_camera(camera *cam) override;
 };
 
 }

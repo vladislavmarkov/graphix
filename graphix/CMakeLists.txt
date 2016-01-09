@@ -37,8 +37,11 @@ add_library(graphixlib SHARED
     public/gfx/graphix.h
     public/gfx/key.h
     public/gfx/mesh.h
+    public/gfx/movement.h
+    public/gfx/node.h
     public/gfx/scene.h
     public/gfx/shader.h
+    public/gfx/vertex_array.h
     public/gfx/window.h
     src/application.cpp
     src/assimp-helpers.cpp
@@ -48,10 +51,19 @@ add_library(graphixlib SHARED
     src/dependent.h
     src/exception.h
     src/mesh_impl.h
-    src/node.h
+    src/movement.cpp
+    src/movement_impl.cpp
+    src/movement_impl.h
+    src/node.cpp
     src/scene.cpp
+    src/scene_impl.cpp
     src/scene_impl.h
     src/shader.cpp
+    src/vertex_array.cpp
+    src/vertex_array_impl.cpp
+    src/vertex_array_impl.h
+    src/vertex_array_object_counter.cpp
+    src/vertex_array_object_counter.h
     src/window.cpp
     src/window_impl.h
 )

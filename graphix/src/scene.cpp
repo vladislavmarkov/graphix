@@ -2,11 +2,11 @@
 #include <assimp/mesh.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
+#include <gfx/node.h>
 #include <gfx/scene.h>
 #include <memory>
 
 #include "assimp-helpers.h"
-#include "node.h"
 #include "scene_impl.h"
 
 // test
@@ -88,7 +88,7 @@ shared_ptr<scene> scene::load(
     // temp
 
     shared_ptr<node> root_node = extract_root_node(assimpscene);
-    vector<shared_ptr<mesh>> meshes = extract_meshes(assimpscene);
+    vector<shared_ptr<drawable>> drawables = extract_meshes(assimpscene);
 
     shared_ptr<scene> result(
         new scene_impl(
@@ -100,7 +100,7 @@ shared_ptr<scene> scene::load(
             cam,
             clear_color,
             std::move(root_node),
-            std::move(meshes)
+            std::move(drawables)
         )
     );
 

@@ -18,8 +18,7 @@ namespace { // anonymous
 
 void glfw3_error_callback(int errcode, const char *description){
     stringstream errmsg;
-    errmsg
-        << "err. code: " << errcode << ", err. message: " << description;
+    errmsg << "err. code: " << errcode << ", err. message: " << description;
     throw glfw3_error(errmsg.str().c_str());
 }
 
@@ -48,7 +47,9 @@ int run(window &main_window){
     main_window_impl.init_callbacks();
 
     while (!glfwWindowShouldClose(handle)){
-        glfwSwapBuffers(handle);
+        main_window_impl.make_frame();
+        main_window_impl.draw();
+        main_window_impl.swap_buffers();
         glfwWaitEvents();
     }
 

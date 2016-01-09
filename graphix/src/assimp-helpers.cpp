@@ -2,6 +2,7 @@
 #include <assimp/mesh.h>
 #include <assimp/scene.h>
 #include <gfx/mesh.h>
+#include <gfx/node.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <list>
@@ -12,7 +13,6 @@
 #include <vector>
 
 #include "mesh_impl.h"
-#include "node.h"
 
 using glm::vec3;
 using std::begin; using std::end;
@@ -118,20 +118,8 @@ shared_ptr<node> convert_node(const aiNode *assimpn){
         )
     ));
 
-    #if 0
-    // temp
-    glm::mat4 &t = result->transformation_;
-    std::cout
-        << "transformation: " << std::endl
-        << t[0][0] << ", " << t[0][1] << ", " << t[0][2] << ", " << t[0][3] << std::endl
-        << t[1][0] << ", " << t[1][1] << ", " << t[1][2] << ", " << t[1][3] << std::endl
-        << t[2][0] << ", " << t[2][1] << ", " << t[2][2] << ", " << t[2][3] << std::endl
-        << t[3][0] << ", " << t[3][1] << ", " << t[3][2] << ", " << t[3][3] << std::endl;
-    // temp
-    #endif
-
     for (size_t i = 0; i < assimpn->mNumMeshes; ++i){
-        result->mesh_indices_.push_back(assimpn->mMeshes[i]);
+        result->drawable_indices_.push_back(assimpn->mMeshes[i]);
     }
 
     return result;
@@ -139,12 +127,12 @@ shared_ptr<node> convert_node(const aiNode *assimpn){
 
 } // anoynmous
 
-vector<shared_ptr<mesh>> extract_meshes(const aiScene *assimpscene){
+vector<shared_ptr<drawable>> extract_meshes(const aiScene *assimpscene){
     if (!assimpscene->mMeshes || !assimpscene->mNumMeshes){
         throw invalid_argument("no meshes to convert");
     }
 
-    vector<shared_ptr<mesh>> result;
+    vector<shared_ptr<drawable>> result;
 
     for (size_t i = 0; i < assimpscene->mNumMeshes; ++i){
         result.emplace_back(convert_mesh(assimpscene->mMeshes[i]));

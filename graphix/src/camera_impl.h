@@ -5,52 +5,82 @@
 #include <atomic>
 #include <gfx/camera.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace gfx{
 
 class camera_impl: public camera{
-    glm::vec3 position_;
-    glm::vec3 direction_;
-    glm::vec3 up_vector_;
-
+    glm::mat4 mx_;
     mutable std::atomic<bool> modified_{true};
 
 public:
-    camera_impl(
-        const glm::vec3 &position,
-        const glm::vec3 &direction,
-        const glm::vec3 up_vector
-    ):
-        position_(position),
-        direction_(direction),
-        up_vector_(up_vector)
+    camera_impl(glm::mat4 mx):
+        mx_(std::move(mx))
     {}
 
-    void set_position(const glm::vec3 &position) override{
-        position_ = position;
-        modified_.store(true, std::memory_order_relaxed);
+    glm::mat4 get_matrix() const{
+        return mx_;
+    }
+
+    glm::vec3 get_backward() const override{
+        return -get_forward();
+    }
+
+    glm::vec3 get_down() const override{
+        return -get_up();
+    }
+
+    glm::vec3 get_forward() const override{
+        #ifdef GLM_LEFT_HANDED
+            return glm::vec3(mx_[0][2], mx_[1][2], mx_[2][2]);
+        #else // GLM_LEFT_HANDED
+            return glm::vec3(-mx_[0][2], -mx_[1][2], -mx_[2][2]);
+        #endif // GLM_LEFT_HANDED
+    }
+
+    glm::vec3 get_left() const override{
+        return -get_right();
     }
 
     glm::vec3 get_position() const override{
-        return position_;
+        glm::mat4 mx_t_ = transpose(mx_);
+
+        // get plane normals
+        glm::vec3 n1(mx_t_[0]);
+        glm::vec3 n2(mx_t_[1]);
+        glm::vec3 n3(mx_t_[2]);
+
+        // get plane distances
+        float d1(mx_t_[0].w);
+        float d2(mx_t_[1].w);
+        float d3(mx_t_[2].w);
+
+        // get the intersection of these 3 planes
+        glm::vec3 n2n3 = glm::cross(n2, n3);
+        glm::vec3 n3n1 = glm::cross(n3, n1);
+        glm::vec3 n1n2 = glm::cross(n1, n2);
+
+        glm::vec3 top = (n2n3 * d1) + (n3n1 * d2) + (n1n2 * d3);
+        float denom = glm::dot(n1, n2n3);
+
+        return top / -denom;
     }
 
-    void set_direction(const glm::vec3 &direction) override{
-        direction_ = direction;
+    glm::vec3 get_right() const override{
+        #ifdef GLM_LEFT_HANDED
+            return -glm::vec3(mx_[0][0], mx_[1][0], mx_[2][0]);
+        #else // GLM_LEFT_HANDED
+            return glm::vec3(mx_[0][0], mx_[1][0], mx_[2][0]);
+        #endif // GLM_LEFT_HANDED
+    }
+
+    glm::vec3 get_up() const override{
+        return glm::vec3(mx_[0][1], mx_[1][1], mx_[2][1]);
+    }
+
+    void set_matrix(glm::mat4 m) override{
+        mx_ = std::move(m);
         modified_.store(true, std::memory_order_relaxed);
-    }
-
-    glm::vec3 get_direction() const override{
-        return direction_;
-    }
-
-    void set_up_vector(const glm::vec3 &up_vector) override{
-        up_vector_ = up_vector;
-        modified_.store(true, std::memory_order_relaxed);
-    }
-
-    glm::vec3 get_up_vector() const override{
-        return up_vector_;
     }
 
     void shot() const override{

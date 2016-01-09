@@ -4,19 +4,11 @@
 
 #include <gfx/glall.h>
 #include <gfx/mesh.h>
+#include <gfx/primitive_type.h>
 
-// temp
-#include <iostream>
-// temp
+#include "vertex_array_object_counter.h"
 
 namespace gfx{
-
-enum class primitive_type: unsigned int{
-    point = GL_POINTS,
-    line = GL_LINES,
-    triangle = GL_TRIANGLES,
-    polygon = GL_POLYGON
-};
 
 class mesh_impl: public mesh{
     const std::string name_;
@@ -74,8 +66,7 @@ public:
             GL_STATIC_DRAW
         );
 
-        static GLuint vao_index = 0;
-        vao_ = vao_index++;
+        vao_ = get_vertex_count();
 
         glGenVertexArrays(1, &vao_);
         glBindVertexArray(vao_);

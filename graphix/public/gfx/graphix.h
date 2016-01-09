@@ -6,7 +6,12 @@
 
 #include <gfx/application.h>
 #include <gfx/camera.h>
+#include <gfx/glall.h>
+#include <gfx/movement.h>
+#include <gfx/node.h>
+#include <gfx/primitive_type.h>
 #include <gfx/scene.h>
+#include <gfx/vertex_array.h>
 #include <gfx/window.h>
 
 #endif // __GRAPHIX_H__

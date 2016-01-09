@@ -11,7 +11,7 @@ namespace gfx{
 
 struct node;
 
-std::vector<std::shared_ptr<mesh>> extract_meshes(const aiScene *);
+std::vector<std::shared_ptr<drawable>> extract_meshes(const aiScene*);
 std::shared_ptr<node> extract_root_node(const aiScene *);
 
 }

@@ -9,6 +9,8 @@
 #include <list>
 #include <stdexcept>
 
+#include "scene_impl.h"
+
 namespace gfx{
 
 class window_impl: public window{
@@ -33,6 +35,8 @@ class window_impl: public window{
     } user_context_;
 
     std::list<std::weak_ptr<scene>> scenes_;
+
+    std::atomic<bool> redraw_requested_{true};
 
 public:
     window_impl(
@@ -183,7 +187,7 @@ public:
         );
 
         if (uc && uc->wnd_ && uc->wnd_impl_){
-            uc->wnd_impl_->draw();
+            uc->wnd_impl_->request_redraw();
 
             if (uc->draw_func_){
                 (*uc->draw_func_)(*uc->wnd_);
@@ -204,7 +208,11 @@ public:
     }
 
     void add(std::shared_ptr<scene> scene_obj) override{
-        scenes_.push_back(scene_obj);
+        if (scene_obj){
+            scene_impl *pimpl = dynamic_cast<scene_impl*>(scene_obj.get());
+            if (pimpl) pimpl->parent_ = this;
+            scenes_.push_back(scene_obj);
+        }
     }
 
     void hide_mouse_cursor() const override{
@@ -223,16 +231,41 @@ public:
             }
         );
 
-        draw();
+        request_redraw();
     }
 
     void draw(){
+        if (!redraw_requested_.load(std::memory_order_relaxed)) return;
+
         std::for_each(std::begin(scenes_), std::end(scenes_),
             [](std::weak_ptr<scene> &scene_obj){
                 std::shared_ptr<scene> s = scene_obj.lock();
                 if (s) s->draw();
             }
         );
+    }
+
+    void make_frame(){
+        std::for_each(std::begin(scenes_), std::end(scenes_),
+            [](std::weak_ptr<scene> &scene_obj){
+                std::shared_ptr<scene> s = scene_obj.lock();
+                if (s) s->make_frame();
+            }
+        );
+    }
+
+    void request_redraw(){
+        if (!redraw_requested_.load(std::memory_order_relaxed)){
+            glfwPostEmptyEvent();
+        }
+        redraw_requested_.store(true, std::memory_order_relaxed);
+    }
+
+    void swap_buffers(){
+        if (redraw_requested_.load(std::memory_order_relaxed)){
+            glfwSwapBuffers(handle_);
+            redraw_requested_.store(false, std::memory_order_relaxed);
+        }
     }
 };
 
