@@ -23,7 +23,11 @@ public:
     }
 
     glm::vec3 get_backward() const override{
-        return -get_forward();
+        #ifdef GLM_LEFT_HANDED
+            return glm::vec3(mx_[0][2], mx_[1][2], mx_[2][2]);
+        #else // GLM_LEFT_HANDED
+            return glm::vec3(-mx_[0][2], -mx_[1][2], -mx_[2][2]);
+        #endif // GLM_LEFT_HANDED
     }
 
     glm::vec3 get_down() const override{
@@ -31,11 +35,7 @@ public:
     }
 
     glm::vec3 get_forward() const override{
-        #ifdef GLM_LEFT_HANDED
-            return glm::vec3(mx_[0][2], mx_[1][2], mx_[2][2]);
-        #else // GLM_LEFT_HANDED
-            return glm::vec3(-mx_[0][2], -mx_[1][2], -mx_[2][2]);
-        #endif // GLM_LEFT_HANDED
+        return -get_backward();
     }
 
     glm::vec3 get_left() const override{
@@ -68,9 +68,9 @@ public:
 
     glm::vec3 get_right() const override{
         #ifdef GLM_LEFT_HANDED
-            return -glm::vec3(mx_[0][0], mx_[1][0], mx_[2][0]);
-        #else // GLM_LEFT_HANDED
             return glm::vec3(mx_[0][0], mx_[1][0], mx_[2][0]);
+        #else // GLM_LEFT_HANDED
+            return -glm::vec3(mx_[0][0], mx_[1][0], mx_[2][0]);
         #endif // GLM_LEFT_HANDED
     }
 

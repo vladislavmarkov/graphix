@@ -110,6 +110,11 @@ public:
     Shows mouse cursor.
      */
 
+    virtual key::state get_key(key::code) const = 0;
+    /*!<
+    Returns the last state reported for the specified key code.
+     */
+
     static std::unique_ptr<window> create(
         const std::string &caption,
         int width = 0,

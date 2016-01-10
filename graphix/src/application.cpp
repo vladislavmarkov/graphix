@@ -1,16 +1,20 @@
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
+#include <atomic>
 #include <gfx/application.h>
+#include <gfx/glall.h>
 #include <gfx/window.h>
 #include <sstream>
+#include <thread>
 
 #include "exception.h"
 #include "window_impl.h"
 
+using std::atomic;
 using std::invalid_argument;
+using std::memory_order_relaxed;
+using std::ref;
 using std::runtime_error;
 using std::stringstream;
+using std::thread;
 
 namespace gfx{
 
@@ -28,29 +32,47 @@ int run(window &main_window){
     window_impl &main_window_impl =
         dynamic_cast<window_impl&>(main_window);
 
-    GLFWwindow *handle = main_window_impl.get_handle();
+    atomic<bool> done{false};
 
-    glfwMakeContextCurrent(handle);
+    thread drawing_thread(
+        [](window_impl &mw_impl, atomic<bool> &done){
+            glfwMakeContextCurrent(mw_impl.get_handle());
 
-    glfwSetErrorCallback(glfw3_error_callback);
+            glfwSetErrorCallback(glfw3_error_callback);
 
-    glewExperimental = GL_TRUE;
-    if (GLEW_OK != glewInit()){
-        throw glew_error("failed to initialize glew");
+            glewExperimental = GL_TRUE;
+            if (GLEW_OK != glewInit()){
+                throw glew_error("failed to initialize glew");
+            }
+
+            glEnable(GL_DEPTH_TEST);
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_BACK);
+            glDepthFunc(GL_LESS);
+
+            glfwSwapInterval(1);
+
+            mw_impl.init_callbacks();
+
+            while (!done.load(memory_order_relaxed)){
+                mw_impl.make_frame();
+                mw_impl.resize();
+                mw_impl.draw();
+                mw_impl.swap_buffers();
+            }
+        },
+        ref(main_window_impl),
+        ref(done)
+    );
+
+    while (!glfwWindowShouldClose(main_window_impl.get_handle())){
+        glfwWaitEvents();
     }
 
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glDepthFunc(GL_LESS);
+    done.store(true, memory_order_relaxed);
 
-    main_window_impl.init_callbacks();
-
-    while (!glfwWindowShouldClose(handle)){
-        main_window_impl.make_frame();
-        main_window_impl.draw();
-        main_window_impl.swap_buffers();
-        glfwWaitEvents();
+    if (drawing_thread.joinable()){
+        drawing_thread.join();
     }
 
     return 0;

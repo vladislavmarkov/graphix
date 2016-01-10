@@ -14,6 +14,9 @@
 namespace gfx{
 
 class window_impl: public window{
+    window_impl(const window_impl&) = delete;
+    window_impl &operator = (const window_impl&) = delete;
+
     GLFWwindow *handle_; // glfw3 handle
 
     std::string caption_;
@@ -37,6 +40,7 @@ class window_impl: public window{
     std::list<std::weak_ptr<scene>> scenes_;
 
     std::atomic<bool> redraw_requested_{true};
+    std::atomic<bool> resize_requested_{true};
 
 public:
     window_impl(
@@ -159,7 +163,11 @@ public:
         );
 
         if (uc && uc->wnd_ && uc->wnd_impl_){
-            uc->wnd_impl_->resize(width, height);
+            uc->wnd_impl_->width_ = width;
+            uc->wnd_impl_->height_ = height;
+            uc->wnd_impl_->resize_requested_.store(
+                true, std::memory_order_relaxed
+            );
 
             if (uc->resize_func_){
                 (*uc->resize_func_)(*uc->wnd_, width, height);
@@ -187,11 +195,11 @@ public:
         );
 
         if (uc && uc->wnd_ && uc->wnd_impl_){
-            uc->wnd_impl_->request_redraw();
-
             if (uc->draw_func_){
                 (*uc->draw_func_)(*uc->wnd_);
             }
+
+            uc->wnd_impl_->request_redraw();
         }
     }
 
@@ -223,13 +231,23 @@ public:
         glfwSetInputMode(handle_, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
 
-    void resize(int width, int height){
+    key::state get_key(key::code kc) const override{
+        return static_cast<key::state>(
+            glfwGetKey(handle_, static_cast<int>(kc))
+        );
+    }
+
+    void resize(){
+        if (!resize_requested_.load(std::memory_order_relaxed)) return;
+
         std::for_each(std::begin(scenes_), std::end(scenes_),
-            [&width, &height](std::weak_ptr<scene> &scene_obj){
+            [this](std::weak_ptr<scene> &scene_obj){
                 std::shared_ptr<scene> s = scene_obj.lock();
-                if (s) s->resize(width, height);
+                if (s) s->resize(width_, height_);
             }
         );
+
+        resize_requested_.store(false, std::memory_order_relaxed);
 
         request_redraw();
     }
@@ -255,9 +273,6 @@ public:
     }
 
     void request_redraw(){
-        if (!redraw_requested_.load(std::memory_order_relaxed)){
-            glfwPostEmptyEvent();
-        }
         redraw_requested_.store(true, std::memory_order_relaxed);
     }
 
