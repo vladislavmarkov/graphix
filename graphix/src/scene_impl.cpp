@@ -215,4 +215,8 @@ void scene_impl::set_camera(camera *cam){
     nodep_camera_.set(cam);
 }
 
+camera *scene_impl::get_camera(){
+    return active_camera_;
+}
+
 }

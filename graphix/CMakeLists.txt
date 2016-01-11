@@ -34,8 +34,10 @@ add_definitions(
 add_library(graphixlib SHARED
     public/gfx/application.h
     public/gfx/camera.h
+    public/gfx/dual-quaternion-helper.h
     public/gfx/graphix.h
     public/gfx/key.h
+    public/gfx/matrix-helpers.h
     public/gfx/mesh.h
     public/gfx/movement.h
     public/gfx/node.h

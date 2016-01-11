@@ -29,10 +29,14 @@ class window_impl: public window{
         window *wnd_{nullptr};
 
         std::function<
-            void(window &wnd, key::code, key::state)
+            void(window&, key::code, key::state)
         > *key_func_{nullptr};
 
-        std::function<void(window &wnd, int, int)> *resize_func_{nullptr};
+        std::function<
+            void(window&, double, double)
+        > *mouse_move_func_{nullptr};
+
+        std::function<void(window&, int, int)> *resize_func_{nullptr};
 
         std::function<void(window&)> *draw_func_{nullptr};
     } user_context_;
@@ -138,19 +142,45 @@ public:
     void set_key_reaction(
         const std::function<void(window &wnd, key::code, key::state)> &key_func
     ) override{
-        user_context_.wnd_ = this;
+        if (!user_context_.wnd_){
+            user_context_.wnd_ = this;
+            user_context_.wnd_impl_ = this;
+        }
+
         user_context_.key_func_ = const_cast<
             std::function<
                 void(window&, key::code, key::state)
             >*
         >(&key_func);
 
-        glfwSetWindowUserPointer(
-            handle_,
-            &user_context_
+        glfwSetWindowUserPointer(handle_, &user_context_);
+        glfwSetKeyCallback(handle_, glfw_key_callback);
+    }
+
+    static void glfw_mouse_move_callback(GLFWwindow* handle, double x, double y){
+        user_context *uc = reinterpret_cast<user_context*>(
+            glfwGetWindowUserPointer(handle)
         );
 
-        glfwSetKeyCallback(handle_, glfw_key_callback);
+        if (uc && uc->wnd_ && uc->mouse_move_func_){
+            (*uc->mouse_move_func_)(*uc->wnd_, x, y);
+        }
+    }
+
+    void set_mouse_move_reaction(
+        const std::function<void(window &wnd, double, double)> &mouse_move_func
+    ) override{
+        if (!user_context_.wnd_){
+            user_context_.wnd_ = this;
+            user_context_.wnd_impl_ = this;
+        }
+
+        user_context_.mouse_move_func_ = const_cast<
+            std::function<void(window&, double, double)>*
+        >(&mouse_move_func);
+
+        glfwSetWindowUserPointer(handle_, &user_context_);
+        glfwSetCursorPosCallback(handle_, glfw_mouse_move_callback);
     }
 
     static void glfw_framebuffer_size_callback(
@@ -178,8 +208,11 @@ public:
     void set_resize_reaction(
         const std::function<void(window&, int, int)> &resize_func
     ) override{
-        user_context_.wnd_ = this;
-        user_context_.wnd_impl_ = this;
+        if (!user_context_.wnd_){
+            user_context_.wnd_ = this;
+            user_context_.wnd_impl_ = this;
+        }
+
         user_context_.resize_func_ = const_cast<
             std::function<
                 void(window&, int, int)
@@ -206,8 +239,11 @@ public:
     void set_refresh_reaction(
         const std::function<void(window&)> &draw_func
     ) override{
-        user_context_.wnd_ = this;
-        user_context_.wnd_impl_ = this;
+        if (!user_context_.wnd_){
+            user_context_.wnd_ = this;
+            user_context_.wnd_impl_ = this;
+        }
+
         user_context_.draw_func_ = const_cast<
             std::function<void(window&)>*
         >(&draw_func);
@@ -223,6 +259,14 @@ public:
         }
     }
 
+    void disable_mouse_cursor() const override{
+        glfwSetInputMode(handle_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+
+    void enable_mouse_cursor() const override{
+        show_mouse_cursor();
+    }
+
     void hide_mouse_cursor() const override{
         glfwSetInputMode(handle_, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
     }
@@ -235,6 +279,10 @@ public:
         return static_cast<key::state>(
             glfwGetKey(handle_, static_cast<int>(kc))
         );
+    }
+
+    void get_cursor_pos(double &x, double &y) const override{
+        glfwGetCursorPos(handle_, &x, &y);
     }
 
     void resize(){

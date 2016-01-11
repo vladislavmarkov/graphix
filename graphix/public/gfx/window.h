@@ -78,6 +78,14 @@ public:
     \param key_func self-explanatory.
      */
 
+    virtual void set_mouse_move_reaction(
+        const std::function<void(window&, double, double)> &mouse_move_func
+    ) = 0;
+    /*!<
+    Sets a mouse move reaction callback function.
+    \param mouse_move_func self-explanatory.
+     */
+
     virtual void set_resize_reaction(
         const std::function<void(window&, int, int)> &resize_func
     ) = 0;
@@ -100,6 +108,16 @@ public:
     \param scene_obj scene to be added.
      */
 
+    virtual void disable_mouse_cursor() const = 0;
+    /*!<
+    Disabling mouse cursor makes unlimited mouse movement available.
+     */
+
+    virtual void enable_mouse_cursor() const = 0;
+    /*!<
+    Enable mouse cursor.
+     */
+
     virtual void hide_mouse_cursor() const = 0;
     /*!<
     Hides mouse cursor.
@@ -113,6 +131,11 @@ public:
     virtual key::state get_key(key::code) const = 0;
     /*!<
     Returns the last state reported for the specified key code.
+     */
+
+    virtual void get_cursor_pos(double&, double&) const = 0;
+    /*!<
+    Returns current mouse cursor position.
      */
 
     static std::unique_ptr<window> create(

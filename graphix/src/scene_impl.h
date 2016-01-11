@@ -196,6 +196,8 @@ public:
     void resize(int width, int height) override;
 
     void set_camera(camera *cam) override;
+
+    camera *get_camera() override;
 };
 
 }

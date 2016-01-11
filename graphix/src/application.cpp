@@ -1,4 +1,5 @@
 #include <atomic>
+#include <future>
 #include <gfx/application.h>
 #include <gfx/glall.h>
 #include <gfx/window.h>
@@ -11,6 +12,7 @@
 using std::atomic;
 using std::invalid_argument;
 using std::memory_order_relaxed;
+using std::promise;
 using std::ref;
 using std::runtime_error;
 using std::stringstream;
@@ -33,9 +35,14 @@ int run(window &main_window){
         dynamic_cast<window_impl&>(main_window);
 
     atomic<bool> done{false};
+    std::promise<void> init_callback_promise;
 
     thread drawing_thread(
-        [](window_impl &mw_impl, atomic<bool> &done){
+        [](
+            window_impl &mw_impl,
+            atomic<bool> &done,
+            promise<void> &init_callback_promise
+        ){
             glfwMakeContextCurrent(mw_impl.get_handle());
 
             glfwSetErrorCallback(glfw3_error_callback);
@@ -54,6 +61,8 @@ int run(window &main_window){
 
             mw_impl.init_callbacks();
 
+            init_callback_promise.set_value();
+
             while (!done.load(memory_order_relaxed)){
                 mw_impl.make_frame();
                 mw_impl.resize();
@@ -62,8 +71,11 @@ int run(window &main_window){
             }
         },
         ref(main_window_impl),
-        ref(done)
+        ref(done),
+        ref(init_callback_promise)
     );
+
+    init_callback_promise.get_future().wait();
 
     while (!glfwWindowShouldClose(main_window_impl.get_handle())){
         glfwWaitEvents();

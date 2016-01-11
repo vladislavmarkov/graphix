@@ -32,6 +32,7 @@ public:
     virtual void request_redraw() = 0;
     virtual void resize(int, int) = 0;
     virtual void set_camera(camera *cam) = 0;
+    virtual camera *get_camera() = 0;
 
     static std::shared_ptr<scene> create(
         float hfov,

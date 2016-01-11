@@ -6,6 +6,7 @@
 
 #include <gfx/application.h>
 #include <gfx/camera.h>
+#include <gfx/dual-quaternion-helper.h>
 #include <gfx/glall.h>
 #include <gfx/movement.h>
 #include <gfx/node.h>
