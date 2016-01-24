@@ -1,8 +1,8 @@
-#include <gfx/camera.h>
+#include <gfx/camera.hpp>
 #include <glm/glm.hpp>
 #include <memory>
 
-#include "camera_impl.h"
+#include "camera-impl.hpp"
 
 using std::shared_ptr;
 

@@ -1,13 +1,13 @@
 #include <atomic>
 #include <future>
-#include <gfx/application.h>
-#include <gfx/glall.h>
-#include <gfx/window.h>
+#include <gfx/application.hpp>
+#include <gfx/glall.hpp>
+#include <gfx/window.hpp>
 #include <sstream>
 #include <thread>
 
-#include "exception.h"
-#include "window_impl.h"
+#include "exception.hpp"
+#include "window-impl.hpp"
 
 using std::atomic;
 using std::invalid_argument;

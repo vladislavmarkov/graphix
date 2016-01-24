@@ -1,6 +1,6 @@
-#include <gfx/movement.h>
+#include <gfx/movement.hpp>
 
-#include "movement_impl.h"
+#include "movement-impl.hpp"
 
 using std::shared_ptr;
 

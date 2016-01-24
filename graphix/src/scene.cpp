@@ -2,12 +2,12 @@
 #include <assimp/mesh.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
-#include <gfx/node.h>
-#include <gfx/scene.h>
+#include <gfx/node.hpp>
+#include <gfx/scene.hpp>
 #include <memory>
 
-#include "assimp-helpers.h"
-#include "scene_impl.h"
+#include "assimp-helpers.hpp"
+#include "scene-impl.hpp"
 
 // test
 #include <iostream>

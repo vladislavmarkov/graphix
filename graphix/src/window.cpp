@@ -1,10 +1,10 @@
-#include <gfx/glall.h>
-#include <gfx/window.h>
+#include <gfx/glall.hpp>
+#include <gfx/window.hpp>
 #include <memory>
 #include <stdexcept>
 
-#include "window_impl.h"
-#include "exception.h"
+#include "window-impl.hpp"
+#include "exception.hpp"
 
 using std::invalid_argument;
 using std::unique_ptr;

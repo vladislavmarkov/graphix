@@ -1,9 +1,11 @@
-#include <gfx/mesh.h>
+#include <gfx/mesh.hpp>
 #include <memory>
+#include <string>
 
-#include "mesh_impl.h"
+#include "mesh-impl.hpp"
 
 using std::shared_ptr;
+using std::string;
 
 namespace gfx{
 

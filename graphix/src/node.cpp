@@ -1,5 +1,5 @@
 #include <algorithm>
-#include <gfx/node.h>
+#include <gfx/node.hpp>
 #include <memory>
 #include <stack>
 #include <stdexcept>

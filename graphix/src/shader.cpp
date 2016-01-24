@@ -1,12 +1,12 @@
 #include <fstream>
-#include <gfx/shader.h>
+#include <gfx/shader.hpp>
 #include <iterator>
 #include <memory>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 
-#include "shader_impl.h"
+#include "shader-impl.hpp"
 
 using std::ifstream;
 using std::invalid_argument;

@@ -32,42 +32,48 @@ add_definitions(
 )
 
 add_library(graphixlib SHARED
-    public/gfx/application.h
-    public/gfx/camera.h
-    public/gfx/dual-quaternion-helper.h
-    public/gfx/graphix.h
-    public/gfx/key.h
-    public/gfx/matrix-helpers.h
-    public/gfx/mesh.h
-    public/gfx/movement.h
-    public/gfx/node.h
-    public/gfx/scene.h
-    public/gfx/shader.h
-    public/gfx/vertex_array.h
-    public/gfx/window.h
+    public/gfx/application.hpp
+    public/gfx/camera.hpp
+    public/gfx/drawable.hpp
+    public/gfx/dual-quaternion-helper.hpp
+    public/gfx/glall.hpp
+    public/gfx/graphix.hpp
+    public/gfx/key.hpp
+    public/gfx/matrix-helpers.hpp
+    public/gfx/mesh.hpp
+    public/gfx/movement.hpp
+    public/gfx/node.hpp
+    public/gfx/primitive-type.hpp
+    public/gfx/scene.hpp
+    public/gfx/shader.hpp
+    public/gfx/vertex-array.hpp
+    public/gfx/window.hpp
     src/application.cpp
     src/assimp-helpers.cpp
-    src/assimp-helpers.h
+    src/assimp-helpers.hpp
+    src/camera-impl.hpp
     src/camera.cpp
-    src/camera_impl.h
-    src/dependent.h
-    src/exception.h
-    src/mesh_impl.h
+    src/dependent.hpp
+    src/exception.hpp
+    src/mesh-impl.hpp
+    src/mesh.cpp
+    src/movement-impl.cpp
+    src/movement-impl.hpp
     src/movement.cpp
-    src/movement_impl.cpp
-    src/movement_impl.h
     src/node.cpp
+    src/scene-impl.cpp
+    src/scene-impl.hpp
     src/scene.cpp
-    src/scene_impl.cpp
-    src/scene_impl.h
+    src/shader-impl.hpp
+    src/shader-program.hpp
     src/shader.cpp
-    src/vertex_array.cpp
-    src/vertex_array_impl.cpp
-    src/vertex_array_impl.h
-    src/vertex_array_object_counter.cpp
-    src/vertex_array_object_counter.h
+    src/vertex-array-impl.cpp
+    src/vertex-array-impl.hpp
+    src/vertex-array-object-counter.cpp
+    src/vertex-array-object-counter.hpp
+    src/vertex-array.cpp
+    src/window-impl.hpp
     src/window.cpp
-    src/window_impl.h
 )
 
 set(GRAPHIXLIB_PACKAGE_NAME graphix)
@@ -101,7 +107,7 @@ target_link_libraries(graphixlib
 )
 
 file(GLOB gfx_include_files
-    "${CMAKE_CURRENT_SOURCE_DIR}/public/gfx/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/public/gfx/*.hpp"
 )
 
 install(FILES ${gfx_include_files} DESTINATION include/gfx)

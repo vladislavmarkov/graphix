@@ -1,8 +1,8 @@
 #include <algorithm>
 #include <assimp/mesh.h>
 #include <assimp/scene.h>
-#include <gfx/mesh.h>
-#include <gfx/node.h>
+#include <gfx/mesh.hpp>
+#include <gfx/node.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <list>
@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-#include "mesh_impl.h"
+#include "mesh-impl.hpp"
 
 using glm::vec3;
 using std::begin; using std::end;
