@@ -24,7 +24,7 @@ shared_ptr<scene> scene::create(
     int height,
     float near,
     float far,
-    camera *cam,
+    shared_ptr<camera> cam,
     glm::vec4 clear_color
 ){
     return shared_ptr<scene>(
@@ -38,7 +38,7 @@ shared_ptr<scene> scene::load(
     int height,
     float near,
     float far,
-    camera *cam,
+    shared_ptr<camera> cam,
     glm::vec4 clear_color,
     const std::string &filename
 ){

@@ -110,17 +110,18 @@ class scene_impl: public scene{
         }
     } dep_projection_;
 
-    camera* active_camera_{nullptr};
+    std::weak_ptr<camera> active_camera_;
 
     class nodep_camera: public dependent{
-        camera *camera_;
+        std::weak_ptr<camera> camera_;
 
     public:
-        nodep_camera(camera *cam): camera_(cam){}
+        nodep_camera(std::weak_ptr<camera> cam): camera_(cam){}
+        nodep_camera(std::shared_ptr<camera> cam): camera_(cam){}
 
         void adjust() override{ /* do nothing */ }
 
-        void set(camera *cam){
+        void set(std::shared_ptr<camera> cam){
             camera_ = cam;
             update();
         }
@@ -131,16 +132,21 @@ class scene_impl: public scene{
     class dep_mvp: public dependent{
         glm::mat4 *mvp_;
         glm::mat4 *projection_;
-        camera *cam_;
+        std::weak_ptr<camera> cam_;
 
     public:
-        dep_mvp(glm::mat4 *mvp, glm::mat4 *projection, camera *cam):
+        dep_mvp(
+            glm::mat4 *mvp,
+            glm::mat4 *projection,
+            std::shared_ptr<camera> cam
+        ):
             mvp_(mvp), projection_(projection), cam_(cam)
         {}
 
         void adjust() override{
-            if (mvp_ && cam_ && projection_){
-                *mvp_ = *projection_ * cam_->get_matrix();
+            auto cam = cam_.lock();
+            if (mvp_ && cam && projection_){
+                *mvp_ = *projection_ * cam->get_matrix();
             }
         }
 
@@ -165,7 +171,7 @@ public:
         int height,
         float near,
         float far,
-        camera *cam,
+        std::shared_ptr<camera> cam,
         glm::vec4 clear_color
     );
 
@@ -175,7 +181,7 @@ public:
         int height,
         float near,
         float far,
-        camera *cam,
+        std::shared_ptr<camera> cam,
         glm::vec4 clear_color,
         std::shared_ptr<node> &&root,
         std::vector<std::shared_ptr<drawable>> &&drawables
@@ -195,9 +201,9 @@ public:
 
     void resize(int width, int height) override;
 
-    void set_camera(camera *cam) override;
+    void set_camera(std::shared_ptr<camera> cam) override;
 
-    camera *get_camera() override;
+    std::shared_ptr<camera> get_camera() override;
 };
 
 }

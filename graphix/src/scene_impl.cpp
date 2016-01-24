@@ -64,11 +64,12 @@ void scene_impl::init_dependencies(){
 
     // update everything in a dependency tree
     nodep_geometrics_.set(hfov_, size_, depth_);
-    nodep_camera_.set(active_camera_);
+    nodep_camera_.set(active_camera_.lock());
 }
 
 void scene_impl::draw(){
-    if (!active_camera_){
+    auto active_camera = active_camera_.lock();
+    if (!active_camera){
         throw std::logic_error("no active camera is set");
     }
 
@@ -79,7 +80,7 @@ void scene_impl::draw(){
 
     instantiate_shaders_if_required_();
 
-    if (active_camera_->was_moved()){
+    if (active_camera->was_moved()){
         nodep_camera_.update();
     }
 
@@ -91,7 +92,7 @@ void scene_impl::draw(){
         if (!current) continue;
         dep_mvp_.set(
             projection_ *
-            active_camera_->get_matrix() *
+            active_camera->get_matrix() *
             current->transformation_
         );
 
@@ -122,7 +123,7 @@ scene_impl::scene_impl(
     int height,
     float near,
     float far,
-    camera *cam,
+    shared_ptr<camera> cam,
     glm::vec4 clear_color
 ):
     vshdr_(nullptr), fshdr_(nullptr), root_(new node(nullptr, "root")),
@@ -130,8 +131,8 @@ scene_impl::scene_impl(
     nodep_geometrics_(&hfov_, &size_, &depth_),
     projection_(1.0f),
     dep_projection_(&projection_, &hfov_, &size_, &depth_),
-    active_camera_(cam), nodep_camera_(active_camera_),
-    mvp_(1.0f), dep_mvp_(&mvp_, &projection_, active_camera_),
+    active_camera_(cam), nodep_camera_(active_camera_.lock()),
+    mvp_(1.0f), dep_mvp_(&mvp_, &projection_, active_camera_.lock()),
     clear_color_(clear_color)
 {
     init_dependencies();
@@ -143,7 +144,7 @@ scene_impl::scene_impl(
     int height,
     float near,
     float far,
-    camera *cam,
+    shared_ptr<camera> cam,
     glm::vec4 clear_color,
     shared_ptr<node> &&root,
     vector<shared_ptr<drawable>> &&drawables
@@ -154,8 +155,8 @@ scene_impl::scene_impl(
     nodep_geometrics_(&hfov_, &size_, &depth_),
     projection_(1.0f),
     dep_projection_(&projection_, &hfov_, &size_, &depth_),
-    active_camera_(cam), nodep_camera_(active_camera_),
-    mvp_(1.0f), dep_mvp_(&mvp_, &projection_, active_camera_),
+    active_camera_(cam), nodep_camera_(active_camera_.lock()),
+    mvp_(1.0f), dep_mvp_(&mvp_, &projection_, active_camera_.lock()),
     clear_color_(clear_color)
 {
     init_dependencies();
@@ -211,12 +212,12 @@ void scene_impl::resize(int width, int height){
     nodep_geometrics_.set(size{width, height});
 }
 
-void scene_impl::set_camera(camera *cam){
+void scene_impl::set_camera(shared_ptr<camera> cam){
     nodep_camera_.set(cam);
 }
 
-camera *scene_impl::get_camera(){
-    return active_camera_;
+shared_ptr<camera> scene_impl::get_camera(){
+    return active_camera_.lock();
 }
 
 }

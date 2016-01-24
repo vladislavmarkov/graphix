@@ -31,8 +31,8 @@ public:
     virtual void make_frame() = 0;
     virtual void request_redraw() = 0;
     virtual void resize(int, int) = 0;
-    virtual void set_camera(camera *cam) = 0;
-    virtual camera *get_camera() = 0;
+    virtual void set_camera(std::shared_ptr<camera> cam) = 0;
+    virtual std::shared_ptr<camera> get_camera() = 0;
 
     static std::shared_ptr<scene> create(
         float hfov,
@@ -40,7 +40,7 @@ public:
         int height,
         float near,
         float far,
-        camera *cam,
+        std::shared_ptr<camera> cam,
         glm::vec4 clear_color
     );
 
@@ -50,7 +50,7 @@ public:
         int height,
         float near,
         float far,
-        camera *cam,
+        std::shared_ptr<camera> cam,
         glm::vec4 clear_color,
         const std::string &filename
     );
