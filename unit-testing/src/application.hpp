@@ -1,5 +1,5 @@
-#include <gfx/application.h>
 #include <future>
+#include <gfx/application.hpp>
 #include <iostream>
 
 TEST(application, running_closing_by_different_threads){

@@ -16,7 +16,9 @@ add_definitions(
 )
 
 add_executable(unit_testing_app
+    src/application.hpp
     src/unit_testing_app.cpp
+    src/window.hpp
 )
 
 target_include_directories(unit_testing_app
