@@ -64,11 +64,10 @@ void scene_impl::init_dependencies(){
 
     // update everything in a dependency tree
     nodep_geometrics_.set(hfov_, size_, depth_);
-    nodep_camera_.set(active_camera_.lock());
 }
 
 void scene_impl::draw(){
-    auto active_camera = active_camera_.lock();
+    shared_ptr<camera> active_camera = nodep_camera_;
     if (!active_camera){
         throw std::logic_error("no active camera is set");
     }
@@ -131,8 +130,8 @@ scene_impl::scene_impl(
     nodep_geometrics_(&hfov_, &size_, &depth_),
     projection_(1.0f),
     dep_projection_(&projection_, &hfov_, &size_, &depth_),
-    active_camera_(cam), nodep_camera_(active_camera_.lock()),
-    mvp_(1.0f), dep_mvp_(&mvp_, &projection_, active_camera_.lock()),
+    nodep_camera_(cam),
+    mvp_(1.0f), dep_mvp_(&mvp_, &projection_, cam),
     clear_color_(clear_color)
 {
     init_dependencies();

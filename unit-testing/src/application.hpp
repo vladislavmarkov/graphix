@@ -4,7 +4,7 @@
 
 TEST(application, running_closing_by_different_threads){
     try{
-        std::unique_ptr<gfx::window> window_ =
+        std::shared_ptr<gfx::window> window_ =
             gfx::window::create("window");
 
         std::promise<int> run_promise;

@@ -7,7 +7,7 @@
 #include "exception.hpp"
 
 using std::invalid_argument;
-using std::unique_ptr;
+using std::shared_ptr;
 
 namespace gfx{
 
@@ -20,7 +20,7 @@ enum: int {
 
 }
 
-unique_ptr<window> window::create(
+shared_ptr<window> window::create(
     const std::string &caption,
     int width,
     int height
@@ -48,7 +48,7 @@ unique_ptr<window> window::create(
         }
     } glfw_guardian__;
 
-    return unique_ptr<window>(
+    return shared_ptr<window>(
         new window_impl(
             caption,
             !width ? default_width : width,

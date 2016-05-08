@@ -1,7 +1,7 @@
 
 class caption_width_height_test_: public ::testing::Test{
 public:
-    std::unique_ptr<gfx::window> window_;
+    std::shared_ptr<gfx::window> window_;
 
 protected:
     virtual void SetUp(){
@@ -17,7 +17,7 @@ TEST_F(caption_width_height_test_, caption_width_height_test){
 
 class empty_caption_test_: public ::testing::Test{
 public:
-    std::unique_ptr<gfx::window> window_;
+    std::shared_ptr<gfx::window> window_;
 
 protected:
     virtual void SetUp(){
@@ -27,7 +27,7 @@ protected:
 
 TEST(window, empty_caption_test){
     try{
-        std::unique_ptr<gfx::window> window_ = gfx::window::create("");
+        std::shared_ptr<gfx::window> window_ = gfx::window::create("");
         FAIL() << "expected std::invalid_argument";
     }catch(std::invalid_argument e){
         EXPECT_STREQ("empty caption", e.what());
@@ -38,7 +38,7 @@ TEST(window, empty_caption_test){
 
 TEST(window, caption_only_test){
     try{
-        std::unique_ptr<gfx::window> window_ =
+        std::shared_ptr<gfx::window> window_ =
             gfx::window::create("caption only");
     }catch(...){
         FAIL() << "expected no exceptions";

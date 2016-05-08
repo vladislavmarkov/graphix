@@ -138,14 +138,14 @@ public:
     Returns current mouse cursor position.
      */
 
-    static std::unique_ptr<window> create(
+    static std::shared_ptr<window> create(
         const std::string &caption,
         int width = 0,
         int height = 0
     );
     /*!<
     Creates a [window](@ref window) with specified parameters and returns a
-    [std::unique_ptr](http://ru.cppreference.com/w/cpp/memory/unique_ptr) to a
+    [std::shared_ptr](http://ru.cppreference.com/w/cpp/memory/shared_ptr) to a
     created [window](@ref window) object.
     \param caption caption of the [window](@ref window). Can not be empty.
     \param width can be ignored to use a default value.

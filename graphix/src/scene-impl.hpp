@@ -125,6 +125,10 @@ class scene_impl: public scene{
             camera_ = cam;
             update();
         }
+
+        operator std::shared_ptr<camera> (){
+            return camera_.lock();
+        }
     } nodep_camera_;
 
     glm::mat4 mvp_;
