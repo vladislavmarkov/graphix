@@ -16,18 +16,15 @@ add_definitions(
 )
 
 add_executable(unit_testing_app
-    src/application.hpp
     src/unit_testing_app.cpp
-    src/window.hpp
 )
 
 target_include_directories(unit_testing_app
-    PUBLIC graphixlib ${GTEST_INCLUDE_DIRS}
-    PRIVATE src
+PUBLIC
+    ${GTEST_INCLUDE_DIRS}
 )
 
 target_link_libraries(unit_testing_app
-    graphixlib
     ${GTEST_BOTH_LIBRARIES}
     pthread
 )

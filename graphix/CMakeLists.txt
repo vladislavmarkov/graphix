@@ -1,151 +1,99 @@
-project(graphixlib
-    VERSION 0.0.1
-)
-
-set(PROJECT_DESCRIPTION "Graphix is a OpenGL C++ wrapper library.")
-
-include(FindPkgConfig)
-find_package(PkgConfig REQUIRED)
-
-set(ASSIMP_REQUIRED_VERSION "assimp >= 3.2")
-set(GLEW_REQUIRED_VERSION "glew >= 1.10.0")
-set(GLFW3_REQUIRED_VERSION "glfw3 >= 3.1.2")
-
-pkg_check_modules(ASSIMP REQUIRED ${ASSIMP_REQUIRED_VERSION})
-pkg_check_modules(GLEW REQUIRED ${GLEW_REQUIRED_VERSION})
-pkg_check_modules(GLFW3 REQUIRED ${GLFW3_REQUIRED_VERSION})
+project(graphixapp VERSION 0.0.1)
 
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost 1.54)
+find_library(ZMQ_LIB zmq)
+find_package(Boost 1.54 REQUIRED)
+find_package(SDL2 REQUIRED)
+find_path(MSGPACK_INCLUDE_DIRS msgpack.hpp
+    /usr/local/include
+    /usr/include
+)
+
+string(STRIP ${SDL2_LIBRARIES} SDL2_LIBRARIES)
 
 add_definitions(
-    "-std=gnu++11"
+    "-std=gnu++14"
     "-Wall"
+    "-Wextra"
     "-W"
     "-pedantic"
-    "-Wextra"
     "-Wconversion"
     "-Winit-self"
     "-Woverloaded-virtual"
     "-Wunreachable-code"
 )
 
-add_library(graphixlib SHARED
-    public/gfx/application.hpp
-    public/gfx/camera.hpp
-    public/gfx/drawable.hpp
-    public/gfx/dual-quaternion-helper.hpp
-    public/gfx/glall.hpp
-    public/gfx/graphix.hpp
-    public/gfx/key.hpp
-    public/gfx/matrix-helpers.hpp
-    public/gfx/mesh.hpp
-    public/gfx/movement.hpp
-    public/gfx/node.hpp
-    public/gfx/primitive-type.hpp
-    public/gfx/scene.hpp
-    public/gfx/shader.hpp
-    public/gfx/vertex-array.hpp
-    public/gfx/window.hpp
-    src/application.cpp
-    src/assimp-helpers.cpp
-    src/assimp-helpers.hpp
-    src/camera-impl.hpp
-    src/camera.cpp
-    src/dependent.hpp
-    src/exception.hpp
-    src/mesh-impl.hpp
-    src/mesh.cpp
-    src/movement-impl.cpp
-    src/movement-impl.hpp
-    src/movement.cpp
-    src/node.cpp
-    src/scene-impl.cpp
-    src/scene-impl.hpp
-    src/scene.cpp
-    src/shader-impl.hpp
-    src/shader-program.hpp
-    src/shader.cpp
-    src/vertex-array-impl.cpp
-    src/vertex-array-impl.hpp
-    src/vertex-array-object-counter.cpp
-    src/vertex-array-object-counter.hpp
-    src/vertex-array.cpp
-    src/window-impl.hpp
-    src/window.cpp
+set(ALL_SOURCE_FILES
+    ${PROJECT_SOURCE_DIR}/src/application.hpp
+    ${PROJECT_SOURCE_DIR}/src/application_impl.cpp
+    ${PROJECT_SOURCE_DIR}/src/application_impl.hpp
+    ${PROJECT_SOURCE_DIR}/src/error.hpp
+    ${PROJECT_SOURCE_DIR}/src/graphix.cpp
+    ${PROJECT_SOURCE_DIR}/src/window.hpp
+    ${PROJECT_SOURCE_DIR}/src/window_impl.cpp
+    ${PROJECT_SOURCE_DIR}/src/window_impl.hpp
 )
 
-set(GRAPHIXLIB_PACKAGE_NAME graphix)
+add_executable(graphixapp ${ALL_SOURCE_FILES})
 
-set_target_properties(graphixlib
-    PROPERTIES OUTPUT_NAME ${GRAPHIXLIB_PACKAGE_NAME}
+set(GRAPHIXAPP_PACKAGE_NAME graphix)
+
+set_target_properties(graphixapp
+    PROPERTIES OUTPUT_NAME ${GRAPHIXAPP_PACKAGE_NAME}
 )
 
-target_include_directories(graphixlib
-    PUBLIC
-        ${ASSIMP_INCLUDE_DIRS}
-        ${Boost_INCLUDE_DIRS}
-        ${GLEW_INCLUDE_DIRS}
-        ${GLFW3_INCLUDE_DIRS}
-        public
-    PRIVATE
-        src
+target_include_directories(graphixapp
+PRIVATE
+    ${MSGPACK_INCLUDE_DIRS}
+    ${SDL2_INCLUDE_DIRS}
+    cppzmq
 )
 
-link_directories(
-    ${ASSIMP_LIBRARY_DIRS}
-    ${GLEW_LIBRARY_DIRS}
-    ${GLFW3_LIBRARY_DIRS}
+target_link_libraries(graphixapp
+PRIVATE
+    ${SDL2_LIBRARIES}
+    ${ZMQ_LIB}
+    pthread
 )
 
-target_link_libraries(graphixlib
-    ${ASSIMP_LIBRARIES}
-    ${GLEW_LIBRARIES}
-    ${GLFW3_LIBRARIES}
-    ${GLFW3_STATIC_LIBRARIES}
+add_custom_target(cppcheck
+    COMMAND /usr/bin/cppcheck
+    --enable=all
+    --suppress=missingIncludeSystem
+    --std=c++11
+    --template="[{severity}][{id}] {message} {callstack} \(on {file}:{line}\)"
+    --verbose
+    --quiet
+    ${ALL_SOURCE_FILES}
 )
 
-file(GLOB gfx_include_files
-    "${CMAKE_CURRENT_SOURCE_DIR}/public/gfx/*.hpp"
-)
+# add_custom_target(clangformat
+#     COMMAND /usr/bin/clang-format-3.8
+#     -style=LLVM
+#     -i ${ALL_SOURCE_FILES}
+# )
 
-install(FILES ${gfx_include_files} DESTINATION include/gfx)
+set(SDL2_REQUIRED_VERSION "SDL2 >= 2.0.4")
 
-install(TARGETS graphixlib
-    LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/lib"
-    ARCHIVE DESTINATION "${CMAKE_INSTALL_PREFIX}/lib"
-)
+install(TARGETS graphixapp RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
 
-set(CPACK_PACKAGE_NAME "libgraphix-dev")
+set(CPACK_PACKAGE_NAME "graphix")
 
 set(CPACK_GENERATOR "DEB")
 set(CPACK_PACKAGE_CONTACT "Vlad Markov <vladislav.u.markov@gmail.com>")
-
-set(CPACK_PACKAGE_FILE_NAME
-    "lib${GRAPHIXLIB_PACKAGE_NAME}-${PROJECT_VERSION}-dev"
-)
-
-set(CPACK_STRIP_FILES FALSE)
-
-set(PKG_CONFIG_REQUIRES "${ASSIMP_REQUIRED_VERSION} ${GLEW_REQUIRED_VERSION} ${GLFW3_REQUIRED_VERSION}")
-
-set(PKG_CONFIG_LIBDIR "\${prefix}/lib")
-
-set(PKG_CONFIG_INCLUDEDIR "\${prefix}/include")
-
-set(PKG_CONFIG_LIBS "-L\${libdir} -l${GRAPHIXLIB_PACKAGE_NAME}")
-
-set(PKG_CONFIG_CFLAGS "-I\${includedir}")
+set(CPACK_PACKAGE_FILE_NAME "${GRAPHIXAPP_PACKAGE_NAME}-${PROJECT_VERSION}")
+set(CPACK_STRIP_FILES TRUE)
+set(PKG_CONFIG_REQUIRES "${SDL2_REQUIRED_VERSION}")
 
 configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/${GRAPHIXLIB_PACKAGE_NAME}.pc.in
-    ${CMAKE_CURRENT_BINARY_DIR}/${GRAPHIXLIB_PACKAGE_NAME}.pc
+    ${CMAKE_CURRENT_SOURCE_DIR}/${GRAPHIXAPP_PACKAGE_NAME}.pc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/${GRAPHIXAPP_PACKAGE_NAME}.pc
     @ONLY
 )
 
 install(
-    FILES "${CMAKE_CURRENT_BINARY_DIR}/${GRAPHIXLIB_PACKAGE_NAME}.pc"
+    FILES "${CMAKE_CURRENT_BINARY_DIR}/${GRAPHIXAPP_PACKAGE_NAME}.pc"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig"
 )
 
