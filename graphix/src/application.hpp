@@ -7,7 +7,7 @@
 namespace gfx {
 
 class application {
-  public:
+public:
     application(const application&) = delete;
     application& operator=(const application&) = delete;
 

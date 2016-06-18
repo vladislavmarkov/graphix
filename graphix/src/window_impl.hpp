@@ -19,7 +19,7 @@ class window_impl : public gfx::window {
 
     std::string _caption;
 
-  public:
+public:
     window_impl(const window_impl&) = delete;
     window_impl& operator=(const window_impl&) = delete;
 

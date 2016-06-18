@@ -28,7 +28,7 @@ class application_impl final : public gfx::application {
 
     bool handle_event(const SDL_Event*); // return true when done
 
-  public:
+public:
     application_impl();
     ~application_impl() final;
 

@@ -10,7 +10,7 @@
 namespace gfx {
 
 class window {
-  public:
+public:
     window()              = default;
     window(const window&) = delete;
     window& operator=(const window&) = delete;

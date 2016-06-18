@@ -9,7 +9,7 @@ namespace gfx {
 class error : public std::exception {
     const std::string _errmsg;
 
-  public:
+public:
     explicit error(const std::string& errmsg) : _errmsg(errmsg){};
     ~error() override = default;
 };
