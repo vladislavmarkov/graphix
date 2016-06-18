@@ -4,20 +4,20 @@
 
 #include <memory>
 
-namespace gfx{
+namespace gfx {
 
-class application{
-public:
-    application() = default;
+class application {
+  public:
     application(const application&) = delete;
-    application & operator = (const application&) = delete;
+    application& operator=(const application&) = delete;
+
+    application()          = default;
     virtual ~application() = default;
-    virtual int run() = 0;
+    virtual int run()      = 0;
 
     static std::shared_ptr<application> make_shared();
     static std::unique_ptr<application> make_unique();
 };
-
 }
 
 #endif // __GRAPHIX_APPLICATION_HPP__

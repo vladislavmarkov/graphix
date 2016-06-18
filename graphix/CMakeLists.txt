@@ -68,11 +68,11 @@ add_custom_target(cppcheck
     ${ALL_SOURCE_FILES}
 )
 
-# add_custom_target(clangformat
-#     COMMAND /usr/bin/clang-format-3.8
-#     -style=LLVM
-#     -i ${ALL_SOURCE_FILES}
-# )
+add_custom_target(clangformat
+    COMMAND /usr/bin/clang-format-3.8
+    -style=file
+    -i ${ALL_SOURCE_FILES}
+)
 
 set(SDL2_REQUIRED_VERSION "SDL2 >= 2.0.4")
 
