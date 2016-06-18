@@ -2,11 +2,10 @@
 #ifndef __GRAPHIX_WINDOW_IMPL_HPP__
 #define __GRAPHIX_WINDOW_IMPL_HPP__
 
-#include <SDL2/SDL.h>
-#include <memory>
-
 #include "application_impl.hpp"
 #include "window.hpp"
+#include <SDL2/SDL.h>
+#include <memory>
 
 namespace gfx_impl {
 

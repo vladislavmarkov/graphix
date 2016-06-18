@@ -3,6 +3,7 @@
 #define __GRAPHIX_ERROR_HPP__
 
 #include <stdexcept>
+#include <string>
 
 namespace gfx {
 

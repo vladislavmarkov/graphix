@@ -68,7 +68,7 @@ BraceWrapping:
     IndentBraces: false
 
 IncludeCategories:
-  - Regex: '^<'
-    Priority: 1
   - Regex: '^"'
+    Priority: 1
+  - Regex: '^<'
     Priority: 2

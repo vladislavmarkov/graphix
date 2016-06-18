@@ -1,12 +1,8 @@
-#include <SDL2/SDL.h>
-
-// temp
-#include <iostream>
-// temp
+#include "window_impl.hpp"
 
 #include "error.hpp"
 #include "window.hpp"
-#include "window_impl.hpp"
+#include <SDL2/SDL.h>
 
 namespace gfx {
 
@@ -94,6 +90,6 @@ window_impl::get_id() const
 void
 window_impl::handle_message(const SDL_WindowEvent&)
 {
-    // std::cout << __PRETTY_FUNCTION__ << std::endl;
+    // TODO
 }
 }

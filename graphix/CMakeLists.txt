@@ -2,6 +2,7 @@ project(graphixapp VERSION 0.0.1)
 
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
+find_library(MSGPACK_LIB msgpack)
 find_library(ZMQ_LIB zmq)
 find_package(Boost 1.54 REQUIRED)
 find_package(SDL2 REQUIRED)
@@ -14,6 +15,7 @@ string(STRIP ${SDL2_LIBRARIES} SDL2_LIBRARIES)
 
 add_definitions(
     "-std=gnu++14"
+    "-Werror"
     "-Wall"
     "-Wextra"
     "-W"
@@ -30,6 +32,8 @@ set(ALL_SOURCE_FILES
     ${PROJECT_SOURCE_DIR}/src/application_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/error.hpp
     ${PROJECT_SOURCE_DIR}/src/graphix.cpp
+    ${PROJECT_SOURCE_DIR}/src/message.cpp
+    ${PROJECT_SOURCE_DIR}/src/message.hpp
     ${PROJECT_SOURCE_DIR}/src/window.hpp
     ${PROJECT_SOURCE_DIR}/src/window_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/window_impl.hpp
@@ -52,6 +56,7 @@ PRIVATE
 
 target_link_libraries(graphixapp
 PRIVATE
+    ${MSGPACK_LIB}
     ${SDL2_LIBRARIES}
     ${ZMQ_LIB}
     pthread

@@ -1,19 +1,15 @@
+#include "application_impl.hpp"
+
+#include "application.hpp"
+#include "error.hpp"
+#include "message.hpp"
+#include "window_impl.hpp"
 #include <SDL2/SDL.h>
 #include <cassert>
 #include <cstdlib>
 #include <iostream>
 #include <thread>
 #include <zmq.hpp>
-
-// temp
-#include <iostream>
-// temp
-
-#include "application.hpp"
-#include "application_impl.hpp"
-#include "error.hpp"
-#include "message.hpp"
-#include "window_impl.hpp"
 
 namespace gfx {
 

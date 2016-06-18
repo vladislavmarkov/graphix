@@ -2,11 +2,11 @@
 #ifndef __GRAPHIX_APPLICATION_IMPL_HPP__
 #define __GRAPHIX_APPLICATION_IMPL_HPP__
 
+#include "application.hpp"
+#include <SDL2/SDL.h>
 #include <memory>
 #include <unordered_map>
 #include <zmq.hpp>
-
-#include "application.hpp"
 
 union SDL_Event;
 

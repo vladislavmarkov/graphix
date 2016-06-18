@@ -1,8 +1,7 @@
-#include <msgpack.hpp>
-#include <zmq.hpp>
-
 #include "application.hpp"
 #include "window.hpp"
+#include <msgpack.hpp>
+#include <zmq.hpp>
 
 int
 main()

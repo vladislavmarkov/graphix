@@ -2,10 +2,9 @@
 #ifndef __GRAPHIX_WINDOW_HPP__
 #define __GRAPHIX_WINDOW_HPP__
 
+#include "application.hpp"
 #include <memory>
 #include <string>
-
-#include "application.hpp"
 
 namespace gfx {
 
